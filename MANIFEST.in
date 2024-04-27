@@ -1,0 +1,11 @@
+include .pre-commit-config.yaml
+include .readthedocs.yaml
+include AUTHORS
+include CODE_OF_CONDUCT.md
+include CONTRIBUTING.md
+include LICENSE
+include README.rst
+include tox.ini
+recursive-include docs *
+recursive-include test_project *
+recursive-include tests *

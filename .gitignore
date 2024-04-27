@@ -1,0 +1,12 @@
+.coverage
+coverage.xml
+docs/_build
+*.egg-info
+*.egg
+test.db
+build/
+.tox/
+htmlcov/
+*.pyc
+dist/
+.eggs/
