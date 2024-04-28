@@ -1,522 +1,676 @@
-import decimal
-import os
-from contextlib import contextmanager
-
-from django import VERSION as DJANGO_VERSION
-from django.test import TestCase
-from django.core.exceptions import ImproperlyConfigured
-
-from unittest.mock import patch
-
-from configurations.values import (Value, BooleanValue, IntegerValue,
-                                   FloatValue, DecimalValue, ListValue,
-                                   TupleValue, SingleNestedTupleValue,
-                                   SingleNestedListValue, SetValue,
-                                   DictValue, URLValue, EmailValue, IPValue,
-                                   RegexValue, PathValue, SecretValue,
-                                   DatabaseURLValue, EmailURLValue,
-                                   CacheURLValue, BackendsValue,
-                                   CastingMixin, SearchURLValue,
-                                   setup_value, PositiveIntegerValue)
-
-
-@contextmanager
-def env(**kwargs):
-    with patch.dict(os.environ, clear=True, **kwargs):
-        yield
-
-
-class FailingCasterValue(CastingMixin, Value):
-    caster = 'non.existing.caster'
-
-
-class ValueTests(TestCase):
-
-    def test_value_with_default(self):
-        value = Value('default', environ=False)
-        self.assertEqual(type(value), type('default'))
-        self.assertEqual(value, 'default')
-        self.assertEqual(str(value), 'default')
-
-    def test_value_with_default_and_late_binding(self):
-        value = Value('default', environ=False, late_binding=True)
-        self.assertEqual(type(value), Value)
-        with env(DJANGO_TEST='override'):
-            self.assertEqual(value.setup('TEST'), 'default')
-            value = Value(environ_name='TEST')
-            self.assertEqual(type(value), type('override'))
-            self.assertEqual(value, 'override')
-            self.assertEqual(str(value), 'override')
-            self.assertEqual('{0}'.format(value), 'override')
-            self.assertEqual('%s' % value, 'override')
-
-            value = Value(environ_name='TEST', late_binding=True)
-            self.assertEqual(type(value), Value)
-            self.assertEqual(value.value, 'override')
-            self.assertEqual(str(value), 'override')
-            self.assertEqual('{0}'.format(value), 'override')
-            self.assertEqual('%s' % value, 'override')
-
-            self.assertEqual(repr(value), repr('override'))
-
-    def test_value_truthy(self):
-        value = Value('default')
-        self.assertTrue(bool(value))
-
-    def test_value_falsey(self):
-        value = Value()
-        self.assertFalse(bool(value))
-
-    @patch.dict(os.environ, clear=True, DJANGO_TEST='override')
-    def test_env_var(self):
-        value = Value('default')
-        self.assertEqual(value.setup('TEST'), 'override')
-        self.assertEqual(str(value), 'override')
-        self.assertNotEqual(value.setup('TEST'), value.default)
-        self.assertEqual(value.to_python(os.environ['DJANGO_TEST']),
-                         value.setup('TEST'))
-
-    def test_value_reuse(self):
-        value1 = Value('default')
-        value2 = Value(value1)
-        self.assertEqual(value1.setup('TEST1'), 'default')
-        self.assertEqual(value2.setup('TEST2'), 'default')
-        with env(DJANGO_TEST1='override1', DJANGO_TEST2='override2'):
-            self.assertEqual(value1.setup('TEST1'), 'override1')
-            self.assertEqual(value2.setup('TEST2'), 'override2')
-
-    def test_value_var_equal(self):
-        value1 = Value('default')
-        value2 = Value('default')
-        self.assertEqual(value1, value2)
-        self.assertTrue(value1 in ['default'])
-
-    def test_env_var_prefix(self):
-        with patch.dict(os.environ, clear=True, ACME_TEST='override'):
-            value = Value('default', environ_prefix='ACME')
-            self.assertEqual(value.setup('TEST'), 'override')
-
-        with patch.dict(os.environ, clear=True, TEST='override'):
-            value = Value('default', environ_prefix='')
-            self.assertEqual(value.setup('TEST'), 'override')
-
-        with patch.dict(os.environ, clear=True, ACME_TEST='override'):
-            value = Value('default', environ_prefix='ACME_')
-            self.assertEqual(value.setup('TEST'), 'override')
-
-    def test_boolean_values_true(self):
-        value = BooleanValue(False)
-        for truthy in value.true_values:
-            with env(DJANGO_TEST=truthy):
-                self.assertTrue(bool(value.setup('TEST')))
-
-    def test_boolean_values_faulty(self):
-        self.assertRaises(ValueError, BooleanValue, 'false')
-
-    def test_boolean_values_false(self):
-        value = BooleanValue(True)
-        for falsy in value.false_values:
-            with env(DJANGO_TEST=falsy):
-                self.assertFalse(bool(value.setup('TEST')))
-
-    def test_boolean_values_nonboolean(self):
-        value = BooleanValue(True)
-        with env(DJANGO_TEST='nonboolean'):
-            self.assertRaises(ValueError, value.setup, 'TEST')
-
-    def test_boolean_values_assign_false_to_another_booleanvalue(self):
-        value1 = BooleanValue(False)
-        value2 = BooleanValue(value1)
-        self.assertFalse(value1.setup('TEST1'))
-        self.assertFalse(value2.setup('TEST2'))
-
-    def test_integer_values(self):
-        value = IntegerValue(1)
-        with env(DJANGO_TEST='2'):
-            self.assertEqual(value.setup('TEST'), 2)
-        with env(DJANGO_TEST='noninteger'):
-            self.assertRaises(ValueError, value.setup, 'TEST')
-
-    def test_positive_integer_values(self):
-        value = PositiveIntegerValue(1)
-        with env(DJANGO_TEST='2'):
-            self.assertEqual(value.setup('TEST'), 2)
-        with env(DJANGO_TEST='noninteger'):
-            self.assertRaises(ValueError, value.setup, 'TEST')
-        with env(DJANGO_TEST='-1'):
-            self.assertRaises(ValueError, value.setup, 'TEST')
-
-    def test_float_values(self):
-        value = FloatValue(1.0)
-        with env(DJANGO_TEST='2.0'):
-            self.assertEqual(value.setup('TEST'), 2.0)
-        with env(DJANGO_TEST='noninteger'):
-            self.assertRaises(ValueError, value.setup, 'TEST')
-
-    def test_decimal_values(self):
-        value = DecimalValue(decimal.Decimal(1))
-        with env(DJANGO_TEST='2'):
-            self.assertEqual(value.setup('TEST'), decimal.Decimal(2))
-        with env(DJANGO_TEST='nondecimal'):
-            self.assertRaises(ValueError, value.setup, 'TEST')
-
-    def test_failing_caster(self):
-        self.assertRaises(ImproperlyConfigured, FailingCasterValue)
-
-    def test_list_values_default(self):
-        value = ListValue()
-        with env(DJANGO_TEST='2,2'):
-            self.assertEqual(value.setup('TEST'), ['2', '2'])
-        with env(DJANGO_TEST='2, 2 ,'):
-            self.assertEqual(value.setup('TEST'), ['2', '2'])
-        with env(DJANGO_TEST=''):
-            self.assertEqual(value.setup('TEST'), [])
-
-    def test_list_values_separator(self):
-        value = ListValue(separator=':')
-        with env(DJANGO_TEST='/usr/bin:/usr/sbin:/usr/local/bin'):
-            self.assertEqual(value.setup('TEST'),
-                             ['/usr/bin', '/usr/sbin', '/usr/local/bin'])
-
-    def test_List_values_converter(self):
-        value = ListValue(converter=int)
-        with env(DJANGO_TEST='2,2'):
-            self.assertEqual(value.setup('TEST'), [2, 2])
-
-        value = ListValue(converter=float)
-        with env(DJANGO_TEST='2,2'):
-            self.assertEqual(value.setup('TEST'), [2.0, 2.0])
-
-    def test_list_values_custom_converter(self):
-        value = ListValue(converter=lambda x: x * 2)
-        with env(DJANGO_TEST='2,2'):
-            self.assertEqual(value.setup('TEST'), ['22', '22'])
-
-    def test_list_values_converter_exception(self):
-        value = ListValue(converter=int)
-        with env(DJANGO_TEST='2,b'):
-            self.assertRaises(ValueError, value.setup, 'TEST')
-
-    def test_tuple_values_default(self):
-        value = TupleValue()
-        with env(DJANGO_TEST='2,2'):
-            self.assertEqual(value.setup('TEST'), ('2', '2'))
-        with env(DJANGO_TEST='2, 2 ,'):
-            self.assertEqual(value.setup('TEST'), ('2', '2'))
-        with env(DJANGO_TEST=''):
-            self.assertEqual(value.setup('TEST'), ())
-
-    def test_single_nested_list_values_default(self):
-        value = SingleNestedListValue()
-        with env(DJANGO_TEST='2,3;4,5'):
-            expected = [['2', '3'], ['4', '5']]
-            self.assertEqual(value.setup('TEST'), expected)
-        with env(DJANGO_TEST='2;3;4;5'):
-            expected = [['2'], ['3'], ['4'], ['5']]
-            self.assertEqual(value.setup('TEST'), expected)
-        with env(DJANGO_TEST='2,3,4,5'):
-            expected = [['2', '3', '4', '5']]
-            self.assertEqual(value.setup('TEST'), expected)
-        with env(DJANGO_TEST='2, 3 , ; 4 , 5 ; '):
-            expected = [['2', '3'], ['4', '5']]
-            self.assertEqual(value.setup('TEST'), expected)
-        with env(DJANGO_TEST=''):
-            self.assertEqual(value.setup('TEST'), [])
-
-    def test_single_nested_list_values_separator(self):
-        value = SingleNestedListValue(seq_separator=':')
-        with env(DJANGO_TEST='2,3:4,5'):
-            self.assertEqual(value.setup('TEST'), [['2', '3'], ['4', '5']])
-
-    def test_single_nested_list_values_converter(self):
-        value = SingleNestedListValue(converter=int)
-        with env(DJANGO_TEST='2,3;4,5'):
-            self.assertEqual(value.setup('TEST'), [[2, 3], [4, 5]])
-
-    def test_single_nested_list_values_converter_default(self):
-        value = SingleNestedListValue([['2', '3'], ['4', '5']], converter=int)
-        self.assertEqual(value.value, [[2, 3], [4, 5]])
-
-    def test_single_nested_tuple_values_default(self):
-        value = SingleNestedTupleValue()
-        with env(DJANGO_TEST='2,3;4,5'):
-            expected = (('2', '3'), ('4', '5'))
-            self.assertEqual(value.setup('TEST'), expected)
-        with env(DJANGO_TEST='2;3;4;5'):
-            expected = (('2',), ('3',), ('4',), ('5',))
-            self.assertEqual(value.setup('TEST'), expected)
-        with env(DJANGO_TEST='2,3,4,5'):
-            expected = (('2', '3', '4', '5'),)
-            self.assertEqual(value.setup('TEST'), expected)
-        with env(DJANGO_TEST='2, 3 , ; 4 , 5 ; '):
-            expected = (('2', '3'), ('4', '5'))
-            self.assertEqual(value.setup('TEST'), expected)
-        with env(DJANGO_TEST=''):
-            self.assertEqual(value.setup('TEST'), ())
-
-    def test_single_nested_tuple_values_separator(self):
-        value = SingleNestedTupleValue(seq_separator=':')
-        with env(DJANGO_TEST='2,3:4,5'):
-            self.assertEqual(value.setup('TEST'), (('2', '3'), ('4', '5')))
-
-    def test_single_nested_tuple_values_converter(self):
-        value = SingleNestedTupleValue(converter=int)
-        with env(DJANGO_TEST='2,3;4,5'):
-            self.assertEqual(value.setup('TEST'), ((2, 3), (4, 5)))
-
-    def test_single_nested_tuple_values_converter_default(self):
-        value = SingleNestedTupleValue((('2', '3'), ('4', '5')), converter=int)
-        self.assertEqual(value.value, ((2, 3), (4, 5)))
-
-    def test_set_values_default(self):
-        value = SetValue()
-        with env(DJANGO_TEST='2,2'):
-            self.assertEqual(value.setup('TEST'), {'2', '2'})
-        with env(DJANGO_TEST='2, 2 ,'):
-            self.assertEqual(value.setup('TEST'), {'2', '2'})
-        with env(DJANGO_TEST=''):
-            self.assertEqual(value.setup('TEST'), set())
-
-    def test_dict_values_default(self):
-        value = DictValue()
-        with env(DJANGO_TEST='{2: 2}'):
-            self.assertEqual(value.setup('TEST'), {2: 2})
-        expected = {2: 2, '3': '3', '4': [1, 2, 3]}
-        with env(DJANGO_TEST="{2: 2, '3': '3', '4': [1, 2, 3]}"):
-            self.assertEqual(value.setup('TEST'), expected)
-        with env(DJANGO_TEST="""{
-                    2: 2,
-                    '3': '3',
-                    '4': [1, 2, 3],
-                }"""):
-            self.assertEqual(value.setup('TEST'), expected)
-        with env(DJANGO_TEST=''):
-            self.assertEqual(value.setup('TEST'), {})
-        with env(DJANGO_TEST='spam'):
-            self.assertRaises(ValueError, value.setup, 'TEST')
-
-    def test_email_values(self):
-        value = EmailValue('spam@eg.gs')
-        with env(DJANGO_TEST='spam@sp.am'):
-            self.assertEqual(value.setup('TEST'), 'spam@sp.am')
-        with env(DJANGO_TEST='spam'):
-            self.assertRaises(ValueError, value.setup, 'TEST')
-
-    def test_url_values(self):
-        value = URLValue('http://eggs.spam')
-        with env(DJANGO_TEST='http://spam.eggs'):
-            self.assertEqual(value.setup('TEST'), 'http://spam.eggs')
-        with env(DJANGO_TEST='httb://spam.eggs'):
-            self.assertRaises(ValueError, value.setup, 'TEST')
-
-    def test_url_values_with_no_default(self):
-        value = URLValue()  # no default
-        with env(DJANGO_TEST='http://spam.eggs'):
-            self.assertEqual(value.setup('TEST'), 'http://spam.eggs')
-
-    def test_url_values_with_wrong_default(self):
-        self.assertRaises(ValueError, URLValue, 'httb://spam.eggs')
-
-    def test_ip_values(self):
-        value = IPValue('0.0.0.0')
-        with env(DJANGO_TEST='127.0.0.1'):
-            self.assertEqual(value.setup('TEST'), '127.0.0.1')
-        with env(DJANGO_TEST='::1'):
-            self.assertEqual(value.setup('TEST'), '::1')
-        with env(DJANGO_TEST='spam.eggs'):
-            self.assertRaises(ValueError, value.setup, 'TEST')
-
-    def test_regex_values(self):
-        value = RegexValue('000--000', regex=r'\d+--\d+')
-        with env(DJANGO_TEST='123--456'):
-            self.assertEqual(value.setup('TEST'), '123--456')
-        with env(DJANGO_TEST='123456'):
-            self.assertRaises(ValueError, value.setup, 'TEST')
-
-    def test_path_values_with_check(self):
-        value = PathValue()
-        with env(DJANGO_TEST='/'):
-            self.assertEqual(value.setup('TEST'), '/')
-        with env(DJANGO_TEST='~/'):
-            self.assertEqual(value.setup('TEST'), os.path.expanduser('~'))
-        with env(DJANGO_TEST='/does/not/exist'):
-            self.assertRaises(ValueError, value.setup, 'TEST')
-
-    def test_path_values_no_check(self):
-        value = PathValue(check_exists=False)
-        with env(DJANGO_TEST='/'):
-            self.assertEqual(value.setup('TEST'), '/')
-        with env(DJANGO_TEST='~/spam/eggs'):
-            self.assertEqual(value.setup('TEST'),
-                             os.path.join(os.path.expanduser('~'),
-                                          'spam', 'eggs'))
-        with env(DJANGO_TEST='/does/not/exist'):
-            self.assertEqual(value.setup('TEST'), '/does/not/exist')
-
-    def test_secret_value(self):
-        # no default allowed, only environment values are
-        self.assertRaises(ValueError, SecretValue, 'default')
-
-        value = SecretValue()
-        self.assertRaises(ValueError, value.setup, 'TEST')
-        with env(DJANGO_SECRET_KEY='123'):
-            self.assertEqual(value.setup('SECRET_KEY'), '123')
-
-        value = SecretValue(environ_name='FACEBOOK_API_SECRET',
-                            environ_prefix=None,
-                            late_binding=True)
-        self.assertRaises(ValueError, value.setup, 'TEST')
-        with env(FACEBOOK_API_SECRET='123'):
-            self.assertEqual(value.setup('TEST'), '123')
-
-    def test_database_url_value(self):
-        value = DatabaseURLValue()
-        self.assertEqual(value.default, {})
-        with env(DATABASE_URL='sqlite://'):
-            self.assertEqual(value.setup('DATABASE_URL'), {
-                'default': {
-                    'CONN_HEALTH_CHECKS': False,
-                    'CONN_MAX_AGE': 0,
-                    'ENGINE': 'django.db.backends.sqlite3',
-                    'HOST': '',
-                    'NAME': ':memory:',
-                    'PASSWORD': '',
-                    'PORT': '',
-                    'USER': '',
-                }})
-
-    def test_database_url_additional_args(self):
-
-        def mock_database_url_caster(self, url, engine=None):
-            return {'URL': url, 'ENGINE': engine}
-
-        with patch('configurations.values.DatabaseURLValue.caster',
-                   mock_database_url_caster):
-            value = DatabaseURLValue(
-                engine='django_mysqlpool.backends.mysqlpool')
-            with env(DATABASE_URL='sqlite://'):
-                self.assertEqual(value.setup('DATABASE_URL'), {
-                    'default': {
-                        'URL': 'sqlite://',
-                        'ENGINE': 'django_mysqlpool.backends.mysqlpool'
-                    }
-                })
-
-    def test_email_url_value(self):
-        value = EmailURLValue()
-        self.assertEqual(value.default, {})
-        with env(EMAIL_URL='smtps://user@domain.com:password@smtp.example.com:587'):  # noqa: E501
-            self.assertEqual(value.setup('EMAIL_URL'), {
-                'EMAIL_BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
-                'EMAIL_FILE_PATH': '',
-                'EMAIL_HOST': 'smtp.example.com',
-                'EMAIL_HOST_PASSWORD': 'password',
-                'EMAIL_HOST_USER': 'user@domain.com',
-                'EMAIL_PORT': 587,
-                'EMAIL_TIMEOUT': None,
-                'EMAIL_USE_SSL': False,
-                'EMAIL_USE_TLS': True})
-        with env(EMAIL_URL='console://'):
-            self.assertEqual(value.setup('EMAIL_URL'), {
-                'EMAIL_BACKEND': 'django.core.mail.backends.console.EmailBackend',  # noqa: E501
-                'EMAIL_FILE_PATH': '',
-                'EMAIL_HOST': None,
-                'EMAIL_HOST_PASSWORD': None,
-                'EMAIL_HOST_USER': None,
-                'EMAIL_PORT': None,
-                'EMAIL_TIMEOUT': None,
-                'EMAIL_USE_SSL': False,
-                'EMAIL_USE_TLS': False})
-        with env(EMAIL_URL='smtps://user@domain.com:password@smtp.example.com:wrong'):  # noqa: E501
-            self.assertRaises(ValueError, value.setup, 'TEST')
-
-    def test_cache_url_value(self):
-        cache_setting = {
-            'default': {
-                'BACKEND': 'django_redis.cache.RedisCache' if DJANGO_VERSION < (4,) else 'django.core.cache.backends.redis.RedisCache',  # noqa: E501
-                'LOCATION': 'redis://host:6379/1',
-            }
+import re
+from decimal import Decimal, InvalidOperation
+from json import JSONDecodeError
+from pathlib import Path
+
+import pytest
+from django.core.exceptions import ValidationError
+
+from env_config import Environment, values
+from tests.helpers import set_dotenv
+
+
+@set_dotenv(FOO="bar")
+def test_environment__string_value():
+    class Test(Environment):
+        FOO = values.StringValue()
+
+    assert Test.FOO == "bar"
+
+
+def test_environment__string_value__default():
+    class Test(Environment):
+        FOO = values.StringValue(default="fizzbuzz")
+
+    assert Test.FOO == "fizzbuzz"
+
+
+@pytest.mark.parametrize("value", ["true", "True", "1", "yes"])
+def test_environment__boolean_value__truthy(value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.BooleanValue()
+
+    assert Test.FOO is True
+
+
+@pytest.mark.parametrize("value", ["false", "False", "0", "no", ""])
+def test_environment__boolean_value__falsy(value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.BooleanValue()
+
+    assert Test.FOO is False
+
+
+@pytest.mark.parametrize("value", ["1.0", "None", "foo"])
+def test_environment__boolean_value__invalid(value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.BooleanValue()
+
+    msg = f"Cannot interpret {value!r} as a boolean value"
+    with pytest.raises(ValueError, match=re.escape(msg)):
+        assert Test.FOO
+
+
+@pytest.mark.parametrize(
+    ("value", "result"),
+    [
+        ("0", 0),
+        ("1", 1),
+        ("-1", -1),
+        ("+1", 1),
+        ("100_000", 100_000),
+    ],
+)
+def test_environment__integer_value(value, result):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.IntegerValue()
+
+    assert result == Test.FOO
+
+
+@pytest.mark.parametrize("value", ["foo", "1.0", "None", ""])
+def test_environment__integer_value__invalid(value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.IntegerValue()
+
+    with pytest.raises(ValueError):
+        assert Test.FOO
+
+
+@pytest.mark.parametrize(
+    ("value", "result"),
+    [
+        ("0", 0),
+        ("1", 1),
+        ("100_000", 100_000),
+    ],
+)
+def test_environment__positive_integer_value(value, result):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.PositiveIntegerValue()
+
+    assert result == Test.FOO
+
+
+@pytest.mark.parametrize("value", ["-1", "-100_000"])
+def test_environment__integer_value__invalid(value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.PositiveIntegerValue()
+
+    with pytest.raises(ValueError):
+        assert Test.FOO
+
+
+@pytest.mark.parametrize(
+    ("value", "result"),
+    [
+        ("0.0", 0.0),
+        ("0.1", 0.1),
+        ("-0.1", -0.1),
+        ("0.30000000000000004", 0.30000000000000004),
+        ("100_000.000_001", 100_000.000_001),
+        ("1", 1.0),
+        ("-1", -1.0),
+    ],
+)
+def test_environment__float_value(value, result):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.FloatValue()
+
+    assert result == Test.FOO
+
+
+@pytest.mark.parametrize("value", ["foo", "None", ""])
+def test_environment__float_value__invalid(value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.FloatValue()
+
+    with pytest.raises(ValueError):
+        assert Test.FOO
+
+
+@pytest.mark.parametrize(
+    ("value", "result"),
+    [
+        ("0.0", Decimal("0.0")),
+        ("0.1", Decimal("0.1")),
+        ("-0.1", Decimal("-0.1")),
+        ("0.30000000000000004", Decimal("0.30000000000000004")),
+        ("100_000.000_001", Decimal("100_000.000_001")),
+        ("1", Decimal("1.0")),
+        ("-1", Decimal("-1.0")),
+    ],
+)
+def test_environment__decimal_value(value, result):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.DecimalValue()
+
+    assert result == Test.FOO
+
+
+@pytest.mark.parametrize("value", ["foo", "None", ""])
+def test_environment__decimal_value__invalid(value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.DecimalValue()
+
+    with pytest.raises(InvalidOperation):
+        assert Test.FOO
+
+
+def test_environment__import_string_value():
+    with set_dotenv(FOO="env_config.base.Environment"):
+
+        class Test(Environment):
+            FOO = values.ImportStringValue()
+
+    assert Test.FOO == "env_config.base.Environment"
+
+
+@pytest.mark.parametrize("value", ["foo", "None", "this.does.not.exist"])
+def test_environment__import_string_value__invalid(value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.ImportStringValue()
+
+    with pytest.raises(ImportError):
+        assert Test.FOO
+
+
+@pytest.mark.parametrize(
+    ("value", "result"),
+    [
+        ("foo,bar,baz", ["foo", "bar", "baz"]),
+        ("foo, bar, baz ", ["foo", "bar", "baz"]),
+        ("foo,bar,baz,", ["foo", "bar", "baz"]),
+        ("foo", ["foo"]),
+        ("", []),
+    ],
+)
+def test_environment__list_value(value, result):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.ListValue()
+
+    assert result == Test.FOO
+
+
+def test_environment__list_value__integer_child():
+    with set_dotenv(FOO="1,-2,300_000"):
+
+        class Test(Environment):
+            FOO = values.ListValue(child=values.IntegerValue())
+
+    assert Test.FOO == [1, -2, 300_000]
+
+
+def test_environment__list_value__default():
+    class Test(Environment):
+        FOO = values.ListValue(default=["4", "5", "6"])
+
+    assert Test.FOO == ["4", "5", "6"]
+
+
+@pytest.mark.parametrize(
+    ("value", "result"),
+    [
+        ("foo,bar,baz", ("foo", "bar", "baz")),
+        ("foo,bar,baz,", ("foo", "bar", "baz")),
+        ("foo", ("foo",)),
+        ("", ()),
+    ],
+)
+def test_environment__tuple_value(value, result):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.TupleValue()
+
+    assert result == Test.FOO
+
+
+@pytest.mark.parametrize(
+    ("value", "result"),
+    [
+        ("foo,bar,baz", {"foo", "bar", "baz"}),
+        ("foo,bar,baz,", {"foo", "bar", "baz"}),
+        ("foo", {"foo"}),
+        ("", set()),
+    ],
+)
+def test_environment__set_value(value, result: set):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.SetValue()
+
+    assert result.difference(Test.FOO) == set()
+
+
+@pytest.mark.parametrize(
+    ("value", "result"),
+    [
+        ("foo=1;bar=2;baz=3", {"foo": "1", "bar": "2", "baz": "3"}),
+        ("foo=1; bar = 2; baz=3 ", {"foo": "1", "bar": "2", "baz": "3"}),
+        ("foo=1;bar=2;baz=3;", {"foo": "1", "bar": "2", "baz": "3"}),
+        ("foo=1", {"foo": "1"}),
+        ("", {}),
+    ],
+)
+def test_environment__dict_value(value, result: dict):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.DictValue()
+
+    assert result == Test.FOO
+
+
+def test_environment__dict_value__integer_child():
+    with set_dotenv(FOO="foo=1;bar=-2;baz=300_000"):
+
+        class Test(Environment):
+            FOO = values.DictValue(child=values.IntegerValue())
+
+    assert Test.FOO == {"foo": 1, "bar": -2, "baz": 300_000}
+
+
+def test_environment__dict_value__invalid():
+    with set_dotenv(FOO="foo=1;bar2"):
+
+        class Test(Environment):
+            FOO = values.DictValue()
+
+    msg = "Cannot split key-value pair from 'bar2'"
+    with pytest.raises(ValueError, match=re.escape(msg)):
+        assert Test.FOO
+
+
+def test_environment__dict_value__default():
+    class Test(Environment):
+        FOO = values.DictValue(default={"foo": "bar"})
+
+    assert Test.FOO == {"foo": "bar"}
+
+
+@pytest.mark.parametrize(
+    ("value", "result"),
+    [
+        ('{"foo": "1"}', {"foo": "1"}),
+        ('{"foo": 1}', {"foo": 1}),
+        ('[{"foo": "1"}]', [{"foo": "1"}]),
+        ("{}", {}),
+        ("[]", []),
+        ("null", None),
+    ],
+)
+def test_environment__json_value(value, result):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.JsonValue()
+
+    assert result == Test.FOO
+
+
+@pytest.mark.parametrize("value", ['{"foo":}', "", " "])
+def test_environment__json_value__invalid(value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.JsonValue()
+
+    with pytest.raises(JSONDecodeError):
+        assert Test.FOO
+
+
+def test_environment__json_value__default():
+    class Test(Environment):
+        FOO = values.JsonValue(default={"foo": "bar"})
+
+    assert Test.FOO == {"foo": "bar"}
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "foo@email.com",
+        "foo.bar@example.net",
+    ],
+)
+def test_environment__email_value(value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.EmailValue()
+
+    assert value == Test.FOO
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "foo@email",
+        "foo.bar@",
+        "None",
+        "",
+    ],
+)
+def test_environment__email_value__invalid(value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.EmailValue()
+
+    with pytest.raises(ValidationError):
+        assert Test.FOO
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "https://www.example.com",
+        "https://www.example.com/website/page",
+        "https://localhost:8000/website/page",
+        "https://localhost:8000/website/page?foo=bar",
+    ],
+)
+def test_environment__url_value(value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.URLValue()
+
+    assert value == Test.FOO
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "www.example.com",
+        "localhost:8000",
+        "example.com",
+        "example.com/website/page",
+        "/website/page",
+        "/website/page?foo=bar",
+    ],
+)
+def test_environment__url_value__invalid(value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.URLValue()
+
+    with pytest.raises(ValidationError):
+        assert Test.FOO
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "127.0.0.1",
+        "192.168.8.1",
+        "254.222.22.162",
+        "3f7f:b7e1:b838:19d0:15b0:19dc:2343:72e1",
+    ],
+)
+def test_environment__ip_value(value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.IPValue()
+
+    assert value == Test.FOO
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "localhost",
+        "None",
+        "",
+    ],
+)
+def test_environment__ip_value__invalid(value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.IPValue()
+
+    with pytest.raises(ValidationError):
+        assert Test.FOO
+
+
+@pytest.mark.parametrize(
+    ("regex", "value"),
+    [
+        (r"\d\d\d", "123"),
+        (r"^[1-9]{2}$", "42"),
+    ],
+)
+def test_environment__regex_value(regex, value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.RegexValue(regex=regex)
+
+    assert value == Test.FOO
+
+
+@pytest.mark.parametrize(
+    ("regex", "value"),
+    [
+        (r"\d\d\d", "foo"),
+        (r"^[1-9]{2}$", "422"),
+    ],
+)
+def test_environment__regex_value__invalid(regex, value):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.RegexValue(regex=regex)
+
+    with pytest.raises(ValidationError):
+        assert Test.FOO
+
+
+@pytest.mark.parametrize("regex", [r"[", r"*"])
+def test_environment__regex_value__invalid_regex(regex):
+    with set_dotenv(FOO=""):
+
+        class Test(Environment):
+            FOO = values.RegexValue(regex=regex)
+
+    with pytest.raises(re.error):
+        assert Test.FOO
+
+
+@pytest.mark.parametrize(
+    ("value", "result"),
+    [
+        (str(Path(__file__)), str(Path(__file__))),
+        (str(Path(__file__).parent), str(Path(__file__).parent)),
+        ("./foo", str(Path.cwd() / "foo")),
+        ("foo/", str(Path.cwd() / "foo")),
+        ("foo", str(Path.cwd() / "foo")),
+    ],
+)
+def test_environment__path_value(value, result):
+    with set_dotenv(FOO=value):
+
+        class Test(Environment):
+            FOO = values.PathValue(check_exists=False)
+
+    assert result == Test.FOO
+
+
+def test_environment__path_value__check_exists():
+    with set_dotenv(FOO="foo"):
+
+        class Test(Environment):
+            FOO = values.PathValue()
+
+    value = (Path.cwd() / "foo").absolute()
+    msg = f"Path '{value}' does not exist"
+    with pytest.raises(ValueError, match=re.escape(msg)):
+        assert Test.FOO
+
+
+@pytest.mark.parametrize(
+    ("value", "result"),
+    [
+        (
+            "sqlite:////absolute/path/to/db/file.db",
+            {
+                "default": {
+                    "CONN_HEALTH_CHECKS": False,
+                    "CONN_MAX_AGE": 0,
+                    "ENGINE": "django.db.backends.sqlite3",
+                    "HOST": "",
+                    "NAME": "/absolute/path/to/db/file.db",
+                    "PASSWORD": "",
+                    "PORT": "",
+                    "USER": "",
+                }
+            },
+        ),
+        (
+            "mysql://user:password@host:8000/dbname",
+            {
+                "default": {
+                    "CONN_HEALTH_CHECKS": False,
+                    "CONN_MAX_AGE": 0,
+                    "ENGINE": "django.db.backends.mysql",
+                    "HOST": "host",
+                    "NAME": "dbname",
+                    "PASSWORD": "password",
+                    "PORT": 8000,
+                    "USER": "user",
+                }
+            },
+        ),
+        (
+            "postgres://user:password@host:8000/dbname",
+            {
+                "default": {
+                    "CONN_HEALTH_CHECKS": False,
+                    "CONN_MAX_AGE": 0,
+                    "ENGINE": "django.db.backends.postgresql",
+                    "HOST": "host",
+                    "NAME": "dbname",
+                    "PASSWORD": "password",
+                    "PORT": 8000,
+                    "USER": "user",
+                }
+            },
+        ),
+        (
+            "postgis://user:password@host:8000/dbname",
+            {
+                "default": {
+                    "CONN_HEALTH_CHECKS": False,
+                    "CONN_MAX_AGE": 0,
+                    "ENGINE": "django.contrib.gis.db.backends.postgis",
+                    "HOST": "host",
+                    "NAME": "dbname",
+                    "PASSWORD": "password",
+                    "PORT": 8000,
+                    "USER": "user",
+                }
+            },
+        ),
+    ],
+)
+def test_environment__database_url(value, result):
+    with set_dotenv(DATABASE_URL=value):
+
+        class Test(Environment):
+            DATABASES = values.DatabaseURLValue()
+
+    assert result == Test.DATABASES
+
+
+def test_environment__database_url__params():
+    with set_dotenv(DATABASE_URL="postgis://user:password@host:8000/dbname"):
+
+        class Test(Environment):
+            DATABASES = values.DatabaseURLValue(conn_max_age=60)
+
+    assert Test.DATABASES == {
+        "default": {
+            "CONN_HEALTH_CHECKS": False,
+            "CONN_MAX_AGE": 60,
+            "ENGINE": "django.contrib.gis.db.backends.postgis",
+            "HOST": "host",
+            "NAME": "dbname",
+            "PASSWORD": "password",
+            "PORT": 8000,
+            "USER": "user",
         }
-        cache_url = 'redis://user@host:6379/1'
-        value = CacheURLValue(cache_url)
-        self.assertEqual(value.default, cache_setting)
-        value = CacheURLValue()
-        self.assertEqual(value.default, {})
-        with env(CACHE_URL='redis://user@host:6379/1'):
-            self.assertEqual(value.setup('CACHE_URL'), cache_setting)
-        with env(CACHE_URL='wrong://user@host:port/1'):
-            with self.assertRaises(Exception) as cm:
-                value.setup('TEST')
-            self.assertEqual(cm.exception.args[0], 'Unknown backend: "wrong"')
-        with env(CACHE_URL='redis://user@host:port/1'):
-            with self.assertRaises(ValueError) as cm:
-                value.setup('TEST')
-            self.assertEqual(
-                cm.exception.args[0],
-                "Cannot interpret cache URL value 'redis://user@host:port/1'")
+    }
 
-    def test_search_url_value(self):
-        value = SearchURLValue()
-        self.assertEqual(value.default, {})
-        with env(SEARCH_URL='elasticsearch://127.0.0.1:9200/index'):
-            self.assertEqual(value.setup('SEARCH_URL'), {
-                'default': {
-                    'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',  # noqa: E501
-                    'URL': 'http://127.0.0.1:9200',
-                    'INDEX_NAME': 'index',
-                }})
 
-    def test_backend_list_value(self):
-        backends = ['django.middleware.common.CommonMiddleware']
-        value = BackendsValue(backends)
-        self.assertEqual(value.setup('TEST'), backends)
+def test_environment__database_url__alias():
+    with set_dotenv(DATABASE_URL="postgis://user:password@host:8000/dbname"):
 
-        backends = ['non.existing.Backend']
-        self.assertRaises(ValueError, BackendsValue, backends)
+        class Test(Environment):
+            DATABASES = values.DatabaseURLValue(db_alias="testing")
 
-    def test_tuple_value(self):
-        value = TupleValue(None)
-        self.assertEqual(value.default, ())
-        self.assertEqual(value.value, ())
+    assert Test.DATABASES == {
+        "testing": {
+            "CONN_HEALTH_CHECKS": False,
+            "CONN_MAX_AGE": 0,
+            "ENGINE": "django.contrib.gis.db.backends.postgis",
+            "HOST": "host",
+            "NAME": "dbname",
+            "PASSWORD": "password",
+            "PORT": 8000,
+            "USER": "user",
+        }
+    }
 
-        value = TupleValue((1, 2))
-        self.assertEqual(value.default, (1, 2))
-        self.assertEqual(value.value, (1, 2))
 
-    def test_set_value(self):
-        value = SetValue()
-        self.assertEqual(value.default, set())
-        self.assertEqual(value.value, set())
+@pytest.mark.parametrize(
+    ("value", "result"),
+    [
+        (
+            "redis://master:6379",
+            {
+                "default": {
+                    "BACKEND": "django.core.cache.backends.redis.RedisCache",
+                    "LOCATION": "redis://master:6379/0",
+                }
+            },
+        ),
+    ],
+)
+def test_environment__cache_url(value, result):
+    with set_dotenv(CACHE_URL=value):
 
-        value = SetValue([1, 2])
-        self.assertEqual(value.default, {1, 2})
-        self.assertEqual(value.value, {1, 2})
+        class Test(Environment):
+            CACHES = values.CacheURLValue()
 
-    def test_setup_value(self):
-
-        class Target:
-            pass
-
-        value = EmailURLValue()
-        with env(EMAIL_URL='smtps://user@domain.com:password@smtp.example.com:587'):  # noqa: E501
-            setup_value(Target, 'EMAIL', value)
-            self.assertEqual(Target.EMAIL, {
-                'EMAIL_BACKEND': 'django.core.mail.backends.smtp.EmailBackend',
-                'EMAIL_FILE_PATH': '',
-                'EMAIL_HOST': 'smtp.example.com',
-                'EMAIL_HOST_PASSWORD': 'password',
-                'EMAIL_HOST_USER': 'user@domain.com',
-                'EMAIL_PORT': 587,
-                'EMAIL_TIMEOUT': None,
-                'EMAIL_USE_SSL': False,
-                'EMAIL_USE_TLS': True
-            })
-            self.assertEqual(
-                Target.EMAIL_BACKEND,
-                'django.core.mail.backends.smtp.EmailBackend')
-            self.assertEqual(Target.EMAIL_FILE_PATH, '')
-            self.assertEqual(Target.EMAIL_HOST, 'smtp.example.com')
-            self.assertEqual(Target.EMAIL_HOST_PASSWORD, 'password')
-            self.assertEqual(Target.EMAIL_HOST_USER, 'user@domain.com')
-            self.assertEqual(Target.EMAIL_PORT, 587)
-            self.assertEqual(Target.EMAIL_USE_TLS, True)
+    assert result == Test.CACHES
