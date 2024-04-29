@@ -172,23 +172,23 @@ when installed with `make hook`
 By contributing, you agree that your contributions will be licensed under the [MIT Licence].
 
 
-[docs]: https://mrthearman.github.io/django-env-config/
-[Issue]: https://github.com/MrThearMan/django-env-config/issues/new/choose
-[bug report]: https://github.com/MrThearMan/django-env-config/issues/new?template=bug_report.yml
-[feature request]: https://github.com/MrThearMan/django-env-config/issues/new?template=feature_request.yml
-[discussions section]: https://github.com/MrThearMan/django-env-config/discussions
-[pull request]: https://github.com/MrThearMan/django-env-config/compare
-[fork]: https://github.com/MrThearMan/django-env-config/fork
-[setup]: https://github.com/MrThearMan/django-env-config/blob/main/CONTRIBUTING.md#setting-up-the-environment
+[docs]: https://mrthearman.github.io/django-environment-config/
+[Issue]: https://github.com/MrThearMan/django-environment-config/issues/new/choose
+[bug report]: https://github.com/MrThearMan/django-environment-config/issues/new?template=bug_report.yml
+[feature request]: https://github.com/MrThearMan/django-environment-config/issues/new?template=feature_request.yml
+[discussions section]: https://github.com/MrThearMan/django-environment-config/discussions
+[pull request]: https://github.com/MrThearMan/django-environment-config/compare
+[fork]: https://github.com/MrThearMan/django-environment-config/fork
+[setup]: https://github.com/MrThearMan/django-environment-config/blob/main/CONTRIBUTING.md#setting-up-the-environment
 [tox]: https://tox.wiki/
-[code-guidelines]: https://github.com/MrThearMan/django-env-config/blob/main/CONTRIBUTING.md#guidelines-for-writing-code
-[docs-guidelines]: https://github.com/MrThearMan/django-env-config/blob/main/CONTRIBUTING.md#guidelines-for-writing-documentation
-[reviewed]: https://github.com/MrThearMan/django-env-config/blob/main/CONTRIBUTING.md#code-review-process
+[code-guidelines]: https://github.com/MrThearMan/django-environment-config/blob/main/CONTRIBUTING.md#guidelines-for-writing-code
+[docs-guidelines]: https://github.com/MrThearMan/django-environment-config/blob/main/CONTRIBUTING.md#guidelines-for-writing-documentation
+[reviewed]: https://github.com/MrThearMan/django-environment-config/blob/main/CONTRIBUTING.md#code-review-process
 [Github Actions]: https://github.com/features/actions
 [pre-commit ci]: https://pre-commit.ci/
-[new release]: https://github.com/MrThearMan/django-env-config/blob/main/CONTRIBUTING.md#creating-a-new-release
+[new release]: https://github.com/MrThearMan/django-environment-config/blob/main/CONTRIBUTING.md#creating-a-new-release
 [semantic versioning]: https://semver.org/
-[Draft a new release]: https://github.com/MrThearMan/django-env-config/releases/new
+[Draft a new release]: https://github.com/MrThearMan/django-environment-config/releases/new
 [poetry]: https://python-poetry.org/docs/#installation
 [make]: https://man7.org/linux/man-pages/man1/make.1.html
 [chocolatey]: https://chocolatey.org/install

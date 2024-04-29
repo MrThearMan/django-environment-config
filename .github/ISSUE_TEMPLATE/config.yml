@@ -2,4 +2,4 @@ blank_issues_enabled: false
 contact_links:
   - name: Question or Problem
     about: Ask in GitHub Discussions.
-    url: https://github.com/MrThearMan/django-env-config/discussions
+    url: https://github.com/MrThearMan/django-environment-config/discussions

@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "django-env-config"
+name = "django-environment-config"
 version = "0.0.1"
 description = "Configure django settings for multiple environments."
 authors = [
@@ -10,8 +10,8 @@ packages = [
 ]
 license = "MIT"
 readme = "README.md"
-homepage = "https://mrthearman.github.io/django-env-config"
-repository = "https://github.com/MrThearMan/django-env-config"
+homepage = "https://mrthearman.github.io/django-environment-config"
+repository = "https://github.com/MrThearMan/django-environment-config"
 keywords = [
     "django",
     "configuration",
@@ -43,7 +43,7 @@ exclude = [
 ]
 
 [tool.poetry.urls]
-"Bug Tracker" = "https://github.com/MrThearMan/django-env-config/issues"
+"Bug Tracker" = "https://github.com/MrThearMan/django-environment-config/issues"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<4"

@@ -1,4 +1,4 @@
-site_name: Django Env Config
+site_name: Django Environment Config
 
 nav:
   - Home: index.md

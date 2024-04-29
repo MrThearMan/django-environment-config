@@ -13,7 +13,7 @@ body:
     attributes:
       label: I have read the docs thoroughly before making this bug report.
       description: >-
-        Docs can be found [here](https://mrthearman.github.io/django-env-config/).
+        Docs can be found [here](https://mrthearman.github.io/django-environment-config/).
       options:
         - label: "Yes"
           required: true
@@ -22,7 +22,7 @@ body:
     attributes:
       label: I have read through other open issues, and my issue is not a duplicate.
       description: >-
-        Open issues can be found [here](https://github.com/MrThearMan/django-env-config/issues).
+        Open issues can be found [here](https://github.com/MrThearMan/django-environment-config/issues).
       options:
         - label: "Yes"
           required: true

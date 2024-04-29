@@ -15,7 +15,7 @@ __all__ = [
 
 
 class DjangoEnvConfigError(Exception):
-    """Base class for all Django Env Config errors."""
+    """Base class for all Django Environment Config errors."""
 
 
 class MissingEnvValueError(DjangoEnvConfigError):
