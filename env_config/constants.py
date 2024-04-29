@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 __all__ = [
+    "ENV_NAME",
     "Undefined",
 ]
 
@@ -16,3 +17,5 @@ class Undefined:  # pragma: no cover
 
 
 Undefined = Undefined()
+
+ENV_NAME = "DJANGO_SETTINGS_ENVIRONMENT"

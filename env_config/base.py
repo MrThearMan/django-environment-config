@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from django.utils.functional import classproperty
 from dotenv import dotenv_values
 
-from .constants import Undefined
+from .constants import ENV_NAME, Undefined
 
 if TYPE_CHECKING:
     from dotenv.main import StrPath
@@ -27,9 +27,9 @@ class Environment:
         *,
         dotenv_path: StrPath | None | Undefined = Undefined,
     ) -> None:
-        env: str | None = os.environ.get("DJANGO_SETTINGS_ENVIRONMENT")
+        env: str | None = os.environ.get(ENV_NAME)
         if env is None:  # pragma: no cover
-            msg = f"Environment variable 'DJANGO_SETTINGS_ENVIRONMENT' is not set before subclassing {cls.__name__!r}"
+            msg = f"Environment variable {ENV_NAME!r} must be set before subclassing {cls.__name__!r}"
             raise ValueError(msg)
 
         if cls.__name__ != env:
@@ -51,6 +51,7 @@ class Environment:
         setattr(cls, f"_{cls.__name__}__dotenv", dotenv)
         setattr(cls, f"_{cls.__name__}__dotenv_path", dotenv_path)
 
+        cls.pre_setup()
         cls.setup(stack_level=2)
         cls.post_setup()
 
@@ -58,6 +59,13 @@ class Environment:
     def load_dotenv(*, dotenv_path: StrPath | None = None) -> dict[str, str]:
         """Load the `.env` file and return the values."""
         return dotenv_values(dotenv_path=dotenv_path)
+
+    @classmethod
+    def pre_setup(cls) -> None:
+        """
+        Hook for doing additional setup before the settings have been loaded,
+        but after the `.env` file has been loaded.
+        """
 
     @classmethod
     def setup(cls, *, stack_level: int = 1) -> None:

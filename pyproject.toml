@@ -7,6 +7,7 @@ authors = [
 ]
 packages = [
     { include = "env_config" },
+    { include = "pytest_plugin" },
 ]
 license = "MIT"
 readme = "README.md"
@@ -73,6 +74,9 @@ django-stubs = "4.2.7"
 [tool.poetry.extras]
 db = ["dj-database-url"]
 cache = ["django-cache-url"]
+
+[tool.poetry.plugins.pytest11]
+django_environment_config = "pytest_plugin.hooks"
 
 [tool.ruff]
 fix = true
