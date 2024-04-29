@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from django.utils.functional import classproperty
 from dotenv import dotenv_values
+from dotenv.main import find_dotenv
 
 from .constants import ENV_NAME, Undefined
 
@@ -56,8 +57,10 @@ class Environment:
         cls.post_setup()
 
     @staticmethod
-    def load_dotenv(*, dotenv_path: StrPath | None = None) -> dict[str, str]:
+    def load_dotenv(*, dotenv_path: StrPath | None = None) -> dict[str, str]:  # pragma: no cover
         """Load the `.env` file and return the values."""
+        if dotenv_path is None:
+            dotenv_path = find_dotenv(raise_error_if_not_found=True, usecwd=True)
         return dotenv_values(dotenv_path=dotenv_path)
 
     @classmethod

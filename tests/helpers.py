@@ -4,6 +4,7 @@ import os
 from functools import wraps
 from unittest.mock import patch
 
+from env_config import Environment
 from env_config.typing import Any, Callable, ParamSpec, TypeVar
 
 T = TypeVar("T")
@@ -13,7 +14,8 @@ P = ParamSpec("P")
 class set_dotenv:
     def __init__(self, env: str, /, **values: Any) -> None:
         self.env = env
-        self.patch = patch("env_config.base.dotenv_values", return_value=values)
+        path = Environment.load_dotenv.__module__ + "." + Environment.load_dotenv.__qualname__
+        self.patch = patch(path, return_value=values)
 
     def __call__(self, func: Callable[P, T]) -> Callable[P, T]:
         @wraps(func)
