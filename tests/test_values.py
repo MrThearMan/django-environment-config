@@ -10,7 +10,7 @@ from env_config import Environment, values
 from tests.helpers import set_dotenv
 
 
-@set_dotenv(FOO="bar")
+@set_dotenv("Test", FOO="bar")
 def test_environment__string_value():
     class Test(Environment):
         FOO = values.StringValue()
@@ -18,6 +18,7 @@ def test_environment__string_value():
     assert Test.FOO == "bar"
 
 
+@set_dotenv("Test")
 def test_environment__string_value__default():
     class Test(Environment):
         FOO = values.StringValue(default="fizzbuzz")
@@ -25,9 +26,26 @@ def test_environment__string_value__default():
     assert Test.FOO == "fizzbuzz"
 
 
+@set_dotenv("Test")
+def test_environment__string_value__default__nullable():
+    class Test(Environment):
+        FOO = values.StringValue(default=None, nullable=True)
+
+    assert Test.FOO is None
+
+
+@set_dotenv("Test")
+def test_environment__string_value__default__not_nullable():
+    msg = "Value for 'FOO' cannot be None"
+    with pytest.raises(ValueError, match=re.escape(msg)):
+
+        class Test(Environment):
+            FOO = values.StringValue(default=None)
+
+
 @pytest.mark.parametrize("value", ["true", "True", "1", "yes"])
 def test_environment__boolean_value__truthy(value):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value):
 
         class Test(Environment):
             FOO = values.BooleanValue()
@@ -37,7 +55,7 @@ def test_environment__boolean_value__truthy(value):
 
 @pytest.mark.parametrize("value", ["false", "False", "0", "no", ""])
 def test_environment__boolean_value__falsy(value):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value):
 
         class Test(Environment):
             FOO = values.BooleanValue()
@@ -47,14 +65,20 @@ def test_environment__boolean_value__falsy(value):
 
 @pytest.mark.parametrize("value", ["1.0", "None", "foo"])
 def test_environment__boolean_value__invalid(value):
-    with set_dotenv(FOO=value):
+    msg = f"Cannot interpret {value!r} as a boolean value"
+    with set_dotenv("Test", FOO=value), pytest.raises(ValueError, match=re.escape(msg)):
 
         class Test(Environment):
             FOO = values.BooleanValue()
 
-    msg = f"Cannot interpret {value!r} as a boolean value"
-    with pytest.raises(ValueError, match=re.escape(msg)):
-        assert Test.FOO
+
+def test_environment__boolean_value__default():
+    with set_dotenv("Test"):
+
+        class Test(Environment):
+            FOO = values.BooleanValue(default=True)
+
+    assert Test.FOO is True
 
 
 @pytest.mark.parametrize(
@@ -68,7 +92,7 @@ def test_environment__boolean_value__invalid(value):
     ],
 )
 def test_environment__integer_value(value, result):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value):
 
         class Test(Environment):
             FOO = values.IntegerValue()
@@ -78,13 +102,10 @@ def test_environment__integer_value(value, result):
 
 @pytest.mark.parametrize("value", ["foo", "1.0", "None", ""])
 def test_environment__integer_value__invalid(value):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value), pytest.raises(ValueError):
 
         class Test(Environment):
             FOO = values.IntegerValue()
-
-    with pytest.raises(ValueError):
-        assert Test.FOO
 
 
 @pytest.mark.parametrize(
@@ -96,7 +117,7 @@ def test_environment__integer_value__invalid(value):
     ],
 )
 def test_environment__positive_integer_value(value, result):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value):
 
         class Test(Environment):
             FOO = values.PositiveIntegerValue()
@@ -106,13 +127,10 @@ def test_environment__positive_integer_value(value, result):
 
 @pytest.mark.parametrize("value", ["-1", "-100_000"])
 def test_environment__integer_value__invalid(value):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value), pytest.raises(ValueError):
 
         class Test(Environment):
             FOO = values.PositiveIntegerValue()
-
-    with pytest.raises(ValueError):
-        assert Test.FOO
 
 
 @pytest.mark.parametrize(
@@ -128,7 +146,7 @@ def test_environment__integer_value__invalid(value):
     ],
 )
 def test_environment__float_value(value, result):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value):
 
         class Test(Environment):
             FOO = values.FloatValue()
@@ -138,13 +156,10 @@ def test_environment__float_value(value, result):
 
 @pytest.mark.parametrize("value", ["foo", "None", ""])
 def test_environment__float_value__invalid(value):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value), pytest.raises(ValueError):
 
         class Test(Environment):
             FOO = values.FloatValue()
-
-    with pytest.raises(ValueError):
-        assert Test.FOO
 
 
 @pytest.mark.parametrize(
@@ -160,7 +175,7 @@ def test_environment__float_value__invalid(value):
     ],
 )
 def test_environment__decimal_value(value, result):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value):
 
         class Test(Environment):
             FOO = values.DecimalValue()
@@ -170,17 +185,14 @@ def test_environment__decimal_value(value, result):
 
 @pytest.mark.parametrize("value", ["foo", "None", ""])
 def test_environment__decimal_value__invalid(value):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value), pytest.raises(InvalidOperation):
 
         class Test(Environment):
             FOO = values.DecimalValue()
 
-    with pytest.raises(InvalidOperation):
-        assert Test.FOO
-
 
 def test_environment__import_string_value():
-    with set_dotenv(FOO="env_config.base.Environment"):
+    with set_dotenv("Test", FOO="env_config.base.Environment"):
 
         class Test(Environment):
             FOO = values.ImportStringValue()
@@ -190,13 +202,10 @@ def test_environment__import_string_value():
 
 @pytest.mark.parametrize("value", ["foo", "None", "this.does.not.exist"])
 def test_environment__import_string_value__invalid(value):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value), pytest.raises(ImportError):
 
         class Test(Environment):
             FOO = values.ImportStringValue()
-
-    with pytest.raises(ImportError):
-        assert Test.FOO
 
 
 @pytest.mark.parametrize(
@@ -210,7 +219,7 @@ def test_environment__import_string_value__invalid(value):
     ],
 )
 def test_environment__list_value(value, result):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value):
 
         class Test(Environment):
             FOO = values.ListValue()
@@ -219,7 +228,7 @@ def test_environment__list_value(value, result):
 
 
 def test_environment__list_value__integer_child():
-    with set_dotenv(FOO="1,-2,300_000"):
+    with set_dotenv("Test", FOO="1,-2,300_000"):
 
         class Test(Environment):
             FOO = values.ListValue(child=values.IntegerValue())
@@ -227,6 +236,7 @@ def test_environment__list_value__integer_child():
     assert Test.FOO == [1, -2, 300_000]
 
 
+@set_dotenv("Test")
 def test_environment__list_value__default():
     class Test(Environment):
         FOO = values.ListValue(default=["4", "5", "6"])
@@ -244,7 +254,7 @@ def test_environment__list_value__default():
     ],
 )
 def test_environment__tuple_value(value, result):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value):
 
         class Test(Environment):
             FOO = values.TupleValue()
@@ -262,7 +272,7 @@ def test_environment__tuple_value(value, result):
     ],
 )
 def test_environment__set_value(value, result: set):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value):
 
         class Test(Environment):
             FOO = values.SetValue()
@@ -281,7 +291,7 @@ def test_environment__set_value(value, result: set):
     ],
 )
 def test_environment__dict_value(value, result: dict):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value):
 
         class Test(Environment):
             FOO = values.DictValue()
@@ -290,7 +300,7 @@ def test_environment__dict_value(value, result: dict):
 
 
 def test_environment__dict_value__integer_child():
-    with set_dotenv(FOO="foo=1;bar=-2;baz=300_000"):
+    with set_dotenv("Test", FOO="foo=1;bar=-2;baz=300_000"):
 
         class Test(Environment):
             FOO = values.DictValue(child=values.IntegerValue())
@@ -299,16 +309,14 @@ def test_environment__dict_value__integer_child():
 
 
 def test_environment__dict_value__invalid():
-    with set_dotenv(FOO="foo=1;bar2"):
+    msg = "Cannot split key-value pair from 'bar2'"
+    with set_dotenv("Test", FOO="foo=1;bar2"), pytest.raises(ValueError, match=re.escape(msg)):
 
         class Test(Environment):
             FOO = values.DictValue()
 
-    msg = "Cannot split key-value pair from 'bar2'"
-    with pytest.raises(ValueError, match=re.escape(msg)):
-        assert Test.FOO
 
-
+@set_dotenv("Test")
 def test_environment__dict_value__default():
     class Test(Environment):
         FOO = values.DictValue(default={"foo": "bar"})
@@ -328,7 +336,7 @@ def test_environment__dict_value__default():
     ],
 )
 def test_environment__json_value(value, result):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value):
 
         class Test(Environment):
             FOO = values.JsonValue()
@@ -338,15 +346,13 @@ def test_environment__json_value(value, result):
 
 @pytest.mark.parametrize("value", ['{"foo":}', "", " "])
 def test_environment__json_value__invalid(value):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value), pytest.raises(JSONDecodeError):
 
         class Test(Environment):
             FOO = values.JsonValue()
 
-    with pytest.raises(JSONDecodeError):
-        assert Test.FOO
 
-
+@set_dotenv("Test")
 def test_environment__json_value__default():
     class Test(Environment):
         FOO = values.JsonValue(default={"foo": "bar"})
@@ -362,7 +368,7 @@ def test_environment__json_value__default():
     ],
 )
 def test_environment__email_value(value):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value):
 
         class Test(Environment):
             FOO = values.EmailValue()
@@ -380,13 +386,10 @@ def test_environment__email_value(value):
     ],
 )
 def test_environment__email_value__invalid(value):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value), pytest.raises(ValidationError):
 
         class Test(Environment):
             FOO = values.EmailValue()
-
-    with pytest.raises(ValidationError):
-        assert Test.FOO
 
 
 @pytest.mark.parametrize(
@@ -399,7 +402,7 @@ def test_environment__email_value__invalid(value):
     ],
 )
 def test_environment__url_value(value):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value):
 
         class Test(Environment):
             FOO = values.URLValue()
@@ -419,13 +422,10 @@ def test_environment__url_value(value):
     ],
 )
 def test_environment__url_value__invalid(value):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value), pytest.raises(ValidationError):
 
         class Test(Environment):
             FOO = values.URLValue()
-
-    with pytest.raises(ValidationError):
-        assert Test.FOO
 
 
 @pytest.mark.parametrize(
@@ -438,7 +438,7 @@ def test_environment__url_value__invalid(value):
     ],
 )
 def test_environment__ip_value(value):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value):
 
         class Test(Environment):
             FOO = values.IPValue()
@@ -455,13 +455,10 @@ def test_environment__ip_value(value):
     ],
 )
 def test_environment__ip_value__invalid(value):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value), pytest.raises(ValidationError):
 
         class Test(Environment):
             FOO = values.IPValue()
-
-    with pytest.raises(ValidationError):
-        assert Test.FOO
 
 
 @pytest.mark.parametrize(
@@ -472,7 +469,7 @@ def test_environment__ip_value__invalid(value):
     ],
 )
 def test_environment__regex_value(regex, value):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value):
 
         class Test(Environment):
             FOO = values.RegexValue(regex=regex)
@@ -488,24 +485,18 @@ def test_environment__regex_value(regex, value):
     ],
 )
 def test_environment__regex_value__invalid(regex, value):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value), pytest.raises(ValidationError):
 
         class Test(Environment):
             FOO = values.RegexValue(regex=regex)
-
-    with pytest.raises(ValidationError):
-        assert Test.FOO
 
 
 @pytest.mark.parametrize("regex", [r"[", r"*"])
 def test_environment__regex_value__invalid_regex(regex):
-    with set_dotenv(FOO=""):
+    with set_dotenv("Test", FOO=""), pytest.raises(re.error):
 
         class Test(Environment):
             FOO = values.RegexValue(regex=regex)
-
-    with pytest.raises(re.error):
-        assert Test.FOO
 
 
 @pytest.mark.parametrize(
@@ -519,7 +510,7 @@ def test_environment__regex_value__invalid_regex(regex):
     ],
 )
 def test_environment__path_value(value, result):
-    with set_dotenv(FOO=value):
+    with set_dotenv("Test", FOO=value):
 
         class Test(Environment):
             FOO = values.PathValue(check_exists=False)
@@ -528,14 +519,13 @@ def test_environment__path_value(value, result):
 
 
 def test_environment__path_value__check_exists():
-    with set_dotenv(FOO="foo"):
+    value = (Path.cwd() / "foo").absolute()
+    msg = f"Path '{value}' does not exist"
+    with set_dotenv("Test", FOO="foo"), pytest.raises(ValueError, match=re.escape(msg)):
 
         class Test(Environment):
             FOO = values.PathValue()
 
-    value = (Path.cwd() / "foo").absolute()
-    msg = f"Path '{value}' does not exist"
-    with pytest.raises(ValueError, match=re.escape(msg)):
         assert Test.FOO
 
 
@@ -605,7 +595,7 @@ def test_environment__path_value__check_exists():
     ],
 )
 def test_environment__database_url(value, result):
-    with set_dotenv(DATABASE_URL=value):
+    with set_dotenv("Test", DATABASE_URL=value):
 
         class Test(Environment):
             DATABASES = values.DatabaseURLValue()
@@ -613,8 +603,48 @@ def test_environment__database_url(value, result):
     assert result == Test.DATABASES
 
 
+def test_environment__database_url__from_dict_default():
+    databases = {
+        "CONN_HEALTH_CHECKS": False,
+        "CONN_MAX_AGE": 0,
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "HOST": "host",
+        "NAME": "dbname",
+        "PASSWORD": "password",
+        "PORT": 8000,
+        "USER": "user",
+    }
+
+    with set_dotenv("Test"):
+
+        class Test(Environment):
+            DATABASES = values.DatabaseURLValue(default=databases)
+
+    assert Test.DATABASES == {"default": databases}
+
+
+def test_environment__database_url__from_str_default():
+    with set_dotenv("Test"):
+
+        class Test(Environment):
+            DATABASES = values.DatabaseURLValue(default="postgis://user:password@host:8000/dbname")
+
+    assert Test.DATABASES == {
+        "default": {
+            "CONN_HEALTH_CHECKS": False,
+            "CONN_MAX_AGE": 0,
+            "ENGINE": "django.contrib.gis.db.backends.postgis",
+            "HOST": "host",
+            "NAME": "dbname",
+            "PASSWORD": "password",
+            "PORT": 8000,
+            "USER": "user",
+        }
+    }
+
+
 def test_environment__database_url__params():
-    with set_dotenv(DATABASE_URL="postgis://user:password@host:8000/dbname"):
+    with set_dotenv("Test", DATABASE_URL="postgis://user:password@host:8000/dbname"):
 
         class Test(Environment):
             DATABASES = values.DatabaseURLValue(conn_max_age=60)
@@ -634,7 +664,7 @@ def test_environment__database_url__params():
 
 
 def test_environment__database_url__alias():
-    with set_dotenv(DATABASE_URL="postgis://user:password@host:8000/dbname"):
+    with set_dotenv("Test", DATABASE_URL="postgis://user:password@host:8000/dbname"):
 
         class Test(Environment):
             DATABASES = values.DatabaseURLValue(db_alias="testing")
@@ -668,9 +698,37 @@ def test_environment__database_url__alias():
     ],
 )
 def test_environment__cache_url(value, result):
-    with set_dotenv(CACHE_URL=value):
+    with set_dotenv("Test", CACHE_URL=value):
 
         class Test(Environment):
             CACHES = values.CacheURLValue()
 
     assert result == Test.CACHES
+
+
+def test_environment__cache_url__from_dict_default():
+    caches = {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://master:6379/0",
+    }
+
+    with set_dotenv("Test"):
+
+        class Test(Environment):
+            CACHES = values.CacheURLValue(default=caches)
+
+    assert Test.CACHES == {"default": caches}
+
+
+def test_environment__cache_url__from_str_default():
+    with set_dotenv("Test"):
+
+        class Test(Environment):
+            CACHES = values.CacheURLValue(default="redis://master:6379")
+
+    assert Test.CACHES == {
+        "default": {
+            "BACKEND": "django.core.cache.backends.redis.RedisCache",
+            "LOCATION": "redis://master:6379/0",
+        }
+    }

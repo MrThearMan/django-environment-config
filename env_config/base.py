@@ -27,6 +27,14 @@ class Environment:
         *,
         dotenv_path: StrPath | None | Undefined = Undefined,
     ) -> None:
+        env: str | None = os.environ.get("DJANGO_SETTINGS_ENVIRONMENT")
+        if env is None:  # pragma: no cover
+            msg = f"Environment variable 'DJANGO_SETTINGS_ENVIRONMENT' is not set before subclassing {cls.__name__!r}"
+            raise ValueError(msg)
+
+        if cls.__name__ != env:
+            return
+
         # If not given, set it to `None` so that `python-dotenv` will use
         # `dotenv.main.find_dotenv` to find the `.env` file automatically.
         if dotenv_path is Undefined:
@@ -44,6 +52,7 @@ class Environment:
         setattr(cls, f"_{cls.__name__}__dotenv_path", dotenv_path)
 
         cls.setup(stack_level=2)
+        cls.post_setup()
 
     @staticmethod
     def load_dotenv(*, dotenv_path: StrPath | None = None) -> dict[str, str]:
@@ -52,20 +61,15 @@ class Environment:
 
     @classmethod
     def setup(cls, *, stack_level: int = 1) -> None:
-        """Setup the environment and return the loaded settings."""
-        env: str | None = os.environ.get("DJANGO_SETTINGS_ENVIRONMENT")
-        if env is None:  # pragma: no cover
-            msg = f"Environment variable 'DJANGO_SETTINGS_ENVIRONMENT' is not set before subclassing {cls.__name__!r}"
-            raise ValueError(msg)
-
-        if cls.__name__ != env:
-            return
-
-        # Set the loaded settings in the module globals where the environment is defined.
+        """Load settings and set them in the module globals where the environment is defined."""
         settings = cls.load_settings()
         stack = inspect.stack()
         caller_globals: dict[str, Any] = stack[stack_level].frame.f_globals
         caller_globals.update(**settings)
+
+    @classmethod
+    def post_setup(cls) -> None:
+        """Hook for doing additional setup after the settings have been loaded."""
 
     @classmethod
     def load_settings(cls) -> dict[str, Any]:
@@ -74,8 +78,8 @@ class Environment:
 
     @classproperty
     def dotenv(cls) -> dict[str, str] | Undefined:  # noqa: N805
-        return getattr(cls, f"_{cls.__name__}__dotenv")
+        return getattr(cls, f"_{cls.__name__}__dotenv", Undefined)
 
     @classproperty
     def dotenv_path(cls) -> str | None | Undefined:  # noqa: N805
-        return getattr(cls, f"_{cls.__name__}__dotenv_path")
+        return getattr(cls, f"_{cls.__name__}__dotenv_path", Undefined)

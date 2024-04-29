@@ -50,8 +50,9 @@ class Value(ABC, Generic[T]):
     def __init__(
         self,
         *,
-        default: T = Undefined,
+        default: T | None = Undefined,
         env_name: str | Undefined = Undefined,
+        nullable: bool = False,
     ) -> None:
         """
         Value descriptor for an environment variable.
@@ -59,8 +60,9 @@ class Value(ABC, Generic[T]):
         :param default: The default value to use if the environment variable is not set.
         :param env_name: The name of the environment variable to use. If not given, the name of the field is used.
         """
-        self.default: T = default
+        self.default: T | None = default
         self.name: str = env_name
+        self.nullable: bool = nullable
 
         # Use a map to store the value per environment so that we can have
         # different values for environments what inherit from each other.
@@ -85,10 +87,16 @@ class Value(ABC, Generic[T]):
         if value is Undefined:
             raise MissingEnvValueError(name=self.name, env=env)
 
+        if value is None:
+            if self.nullable:
+                return None
+            msg = f"Value for {self.name!r} cannot be None"
+            raise ValueError(msg)
+
         return self.convert(value)
 
     @abstractmethod
-    def convert(self, value: str) -> T:  # pragma: no cover
+    def convert(self, value: str | T) -> T:  # pragma: no cover
         """Convert the given value into the proper representation."""
         raise NotImplementedError
 
@@ -103,7 +111,9 @@ class StringValue(Value[str]):
 class BooleanValue(Value[bool]):
     """Parses env variables into a boolean value."""
 
-    def convert(self, value: str) -> bool:
+    def convert(self, value: str | bool) -> bool:  # noqa: FBT001
+        if isinstance(value, bool):
+            return value
         normalized_value = value.strip().lower()
         if normalized_value in ("yes", "y", "true", "1"):
             return True
@@ -116,14 +126,14 @@ class BooleanValue(Value[bool]):
 class IntegerValue(Value[int]):
     """Parses env variables into an integer value."""
 
-    def convert(self, value: str) -> int:
+    def convert(self, value: str | int) -> int:
         return int(value)
 
 
 class PositiveIntegerValue(IntegerValue):
     """Parses env variables into an integer value, and validates that the value is positive."""
 
-    def convert(self, value: str) -> int:
+    def convert(self, value: str | int) -> int:
         val = super().convert(value)
         if val < 0:
             msg = f"Value must be positive, got {val}"
@@ -134,14 +144,14 @@ class PositiveIntegerValue(IntegerValue):
 class FloatValue(Value[float]):
     """Parses env variables into a float value."""
 
-    def convert(self, value: str) -> float:
+    def convert(self, value: str | float) -> float:
         return float(value)
 
 
 class DecimalValue(Value[Decimal], Decimal):
     """Parses env variables into a Decimal value."""
 
-    def convert(self, value: str) -> Decimal:
+    def convert(self, value: str | Decimal) -> Decimal:
         return Decimal(value)
 
 
@@ -154,17 +164,18 @@ class ImportStringValue(Value[str]):
 
 
 class SequenceValue(Value, ABC, Generic[T]):
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         child: Value[T] | None = None,
         *,
-        default: Sequence[T] = Undefined,
+        default: Sequence[T] | None = Undefined,
         env_name: str | Undefined = Undefined,
+        nullable: bool = False,
         delimiter: str = ",",
     ) -> None:
         self.child = child or StringValue()
         self.delimiter = delimiter
-        super().__init__(default=default, env_name=env_name)
+        super().__init__(default=default, env_name=env_name, nullable=nullable)
 
     def iterate(self, value: str | Sequence[Any]) -> Generator[T, None, None]:
         seq = value.split(self.delimiter) if isinstance(value, str) else value
@@ -201,15 +212,16 @@ class MappingValue(Value, ABC, Generic[T]):
         self,
         child: Value[T] | None = None,
         *,
-        default: Mapping[str, T] = Undefined,
+        default: Mapping[str, T] | None = Undefined,
         env_name: str | Undefined = Undefined,
+        nullable: bool = False,
         kv_delimiter: str = "=",
         item_delimiter: str = ";",
     ) -> None:
         self.child = child or StringValue()
         self.kv_delimiter = kv_delimiter
         self.item_delimiter = item_delimiter
-        super().__init__(default=default, env_name=env_name)
+        super().__init__(default=default, env_name=env_name, nullable=nullable)
 
     def iterate(self, value: str | Mapping[str, Any]) -> Generator[tuple[str, Any], None, None]:
         seq = value.split(self.item_delimiter) if isinstance(value, str) else value.items()
@@ -282,11 +294,12 @@ class RegexValue(StringValue):
         self,
         *,
         regex: str,
-        default: str = Undefined,
+        default: str | None = Undefined,
+        nullable: bool = False,
         env_name: str | Undefined = Undefined,
     ) -> None:
         self.regex = regex
-        super().__init__(default=default, env_name=env_name)
+        super().__init__(default=default, env_name=env_name, nullable=nullable)
 
     def convert(self, value: str) -> str:
         from django.core.validators import RegexValidator
@@ -301,12 +314,13 @@ class PathValue(StringValue):
     def __init__(
         self,
         *,
-        default: str = Undefined,
+        default: str | None = Undefined,
         env_name: str | Undefined = Undefined,
+        nullable: bool = False,
         check_exists: bool = True,
     ) -> None:
         self.check_exists = check_exists
-        super().__init__(default=default, env_name=env_name)
+        super().__init__(default=default, env_name=env_name, nullable=nullable)
 
     def convert(self, value: str) -> str:
         path = Path(value).absolute()
@@ -317,14 +331,14 @@ class PathValue(StringValue):
         return str(path)
 
 
-class DatabaseURLValue(Value[dict]):
+class DatabaseURLValue(Value[DBConfig | str]):
     """Load a database configuration from a URL."""
 
     def __init__(
         self,
         *,
         db_alias: str = "default",
-        default: DBConfig = Undefined,
+        default: DBConfig | str = Undefined,
         env_name: str = "DATABASE_URL",
         **params: Unpack[DBConfigExtra],
     ) -> None:
@@ -332,27 +346,33 @@ class DatabaseURLValue(Value[dict]):
         self.params = params
         super().__init__(default=default, env_name=env_name)
 
-    def convert(self, value: str) -> dict[str, DBConfig]:
+    def convert(self, value: str | DBConfig) -> dict[str, DBConfig]:
+        if not isinstance(value, str):
+            return {self.db_alias: value}
+
         from dj_database_url import parse
 
         config = parse(value, **self.params)
         return {self.db_alias: config}
 
 
-class CacheURLValue(Value[CacheConfig]):
+class CacheURLValue(Value[CacheConfig | str]):
     """Load a cache configuration from a URL."""
 
     def __init__(
         self,
         *,
         cache_alias: str = "default",
-        default: CacheConfig = Undefined,
+        default: CacheConfig | str = Undefined,
         env_name: str = "CACHE_URL",
     ) -> None:
         self.cache_alias = cache_alias
         super().__init__(default=default, env_name=env_name)
 
-    def convert(self, value: str) -> dict[str, CacheConfig]:
+    def convert(self, value: str | CacheConfig) -> dict[str, CacheConfig]:
+        if not isinstance(value, str):
+            return {self.cache_alias: value}
+
         from django_cache_url import parse
 
         config = parse(value)

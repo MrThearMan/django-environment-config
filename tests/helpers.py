@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from functools import wraps
 from unittest.mock import patch
 
@@ -10,20 +11,23 @@ P = ParamSpec("P")
 
 
 class set_dotenv:
-    def __init__(self, **values: Any) -> None:
+    def __init__(self, env: str, /, **values: Any) -> None:
+        self.env = env
         self.patch = patch("env_config.base.dotenv_values", return_value=values)
 
     def __call__(self, func: Callable[P, T]) -> Callable[P, T]:
         @wraps(func)
         def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
             # Run the test with the method patched
-            with self.patch:
+            with self:
                 return func(*args, **kwargs)
 
         return wrapper
 
     def __enter__(self):
+        os.environ["DJANGO_SETTINGS_ENVIRONMENT"] = self.env
         return self.patch.__enter__()
 
     def __exit__(self, *args):
+        os.environ.pop("DJANGO_SETTINGS_ENVIRONMENT", None)
         return self.patch.__exit__(*args)
