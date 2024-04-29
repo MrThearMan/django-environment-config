@@ -29,7 +29,7 @@ class Environment:
     ) -> None:
         env: str | None = os.environ.get(ENV_NAME)
         if env is None:  # pragma: no cover
-            msg = f"Environment variable {ENV_NAME!r} must be set before subclassing {cls.__name__!r}"
+            msg = f"Environment variable {ENV_NAME!r} must be set before subclassing 'Environment'"
             raise ValueError(msg)
 
         if cls.__name__ != env:
