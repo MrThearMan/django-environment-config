@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "django-environment-config"
-version = "0.0.4"
+version = "0.0.5"
 description = "Configure django settings for multiple environments."
 authors = [
     "Matti Lamppu <lamppu.matti.akseli@gmail.com>",
