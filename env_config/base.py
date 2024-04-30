@@ -21,30 +21,56 @@ __all__ = [
 
 
 class Environment:
-    """Configures a single environment."""
+    """
+    Configures a single environment.
+
+    Creation of a subclasses can be customized by setting keyword arguments on the class.
+    See `__init_subclass__` for more info.
+
+    >>> class MyEnvironment(Environment, use_environ=True):
+    >>>     pass
+    """
 
     def __init_subclass__(
         cls,
         *,
         dotenv_path: StrPath | None | Undefined = Undefined,
+        use_environ: bool = False,
     ) -> None:
+        """
+        When a subclass of environment is created, try to immediately load the settings
+        and set them in the module globals where the environment is defined, if the environment matches
+        what has been selected in the `DJANGO_SETTINGS_ENVIRONMENT` environment variable.
+
+        :param dotenv_path: The path to the `.env` file to load. If set to `None`, the `.env` file will not be loaded.
+                            By default, `python-dotenv` will try to find the `.env` file automatically.
+        :param use_environ: If set to `True`, use environment variables instead of using a `.env` file.
+        """
         env: str | None = os.environ.get(ENV_NAME)
         if env is None:  # pragma: no cover
             msg = f"Environment variable {ENV_NAME!r} must be set before subclassing 'Environment'"
             raise ValueError(msg)
 
+        # If the environment does not match, do not load environment or even the `.env` file.
         if cls.__name__ != env:
             return
 
-        # If not given, set it to `None` so that `python-dotenv` will use
-        # `dotenv.main.find_dotenv` to find the `.env` file automatically.
-        if dotenv_path is Undefined:
-            dotenv_path = None
-        # If set to `None` explicitly, do not load a `.env` file.
-        elif dotenv_path is None:
+        # If set to `None` explicitly, or using environment, do not load a `.env` file.
+        if dotenv_path is None or use_environ:
             dotenv_path = Undefined
 
-        dotenv = cls.load_dotenv(dotenv_path=dotenv_path) if dotenv_path is not Undefined else Undefined
+        # If not given, set it to `None` so that `python-dotenv` will use
+        # `dotenv.main.find_dotenv` to find the `.env` file automatically.
+        elif dotenv_path is Undefined:
+            dotenv_path = None
+
+        dotenv: dict[str, str] | Undefined
+        if use_environ:
+            dotenv = os.environ.copy()
+        elif dotenv_path is not Undefined:
+            dotenv = cls.load_dotenv(dotenv_path=dotenv_path)
+        else:
+            dotenv = Undefined
 
         # Do name mangling to avoid overriding the attribute from a parent class.
         # This way, we can have multiple environments with different `.env` files,

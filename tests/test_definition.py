@@ -5,7 +5,7 @@ import pytest
 from env_config import Environment, values
 from env_config.constants import Undefined
 from env_config.errors import MissingEnvValueError
-from tests.helpers import set_dotenv
+from tests.helpers import set_dotenv, set_environ
 
 
 @set_dotenv("Test", FOO="bar")
@@ -101,3 +101,15 @@ def test_environment__value_field__no_dotenv():
 
         class Test(Environment, dotenv_path=None):
             FOO = values.StringValue()
+
+
+@set_environ("Test", FOO="bar")
+def test_environment__use_environ():
+    class Test(Environment, use_environ=True):
+        FOO = values.StringValue()
+
+    assert Test.FOO == "bar"
+
+    # Since `DJANGO_SETTINGS_ENVIRONMENT` is set to "Test", the environment
+    # values are loaded from the `.env` file to the globals where the class is defined.
+    assert globals()["FOO"] == "bar"
