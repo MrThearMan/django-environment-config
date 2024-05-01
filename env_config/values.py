@@ -166,7 +166,7 @@ class SequenceValue(Value, ABC, Generic[T]):
         child: Value[T] | None = None,
         *,
         default: Sequence[T] | None = Undefined,
-        env_name: str | Undefined = Undefined,
+        env_name: str | None | Undefined = Undefined,
         delimiter: str = ",",
     ) -> None:
         self.child = child or StringValue()
@@ -209,7 +209,7 @@ class MappingValue(Value, ABC, Generic[T]):
         child: Value[T] | None = None,
         *,
         default: Mapping[str, T] | None = Undefined,
-        env_name: str | Undefined = Undefined,
+        env_name: str | None | Undefined = Undefined,
         kv_delimiter: str = "=",
         item_delimiter: str = ";",
     ) -> None:
@@ -290,7 +290,7 @@ class RegexValue(StringValue):
         *,
         regex: str,
         default: str | None = Undefined,
-        env_name: str | Undefined = Undefined,
+        env_name: str | None | Undefined = Undefined,
     ) -> None:
         self.regex = regex
         super().__init__(default=default, env_name=env_name)
@@ -309,7 +309,7 @@ class PathValue(StringValue):
         self,
         *,
         default: str | None = Undefined,
-        env_name: str | Undefined = Undefined,
+        env_name: str | None | Undefined = Undefined,
         check_exists: bool = True,
     ) -> None:
         self.check_exists = check_exists
