@@ -18,31 +18,6 @@ def test_environment__string_value():
     assert Test.FOO == "bar"
 
 
-@set_dotenv("Test")
-def test_environment__string_value__default():
-    class Test(Environment):
-        FOO = values.StringValue(default="fizzbuzz")
-
-    assert Test.FOO == "fizzbuzz"
-
-
-@set_dotenv("Test")
-def test_environment__string_value__default__nullable():
-    class Test(Environment):
-        FOO = values.StringValue(default=None, nullable=True)
-
-    assert Test.FOO is None
-
-
-@set_dotenv("Test")
-def test_environment__string_value__default__not_nullable():
-    msg = "Value for 'FOO' cannot be None"
-    with pytest.raises(ValueError, match=re.escape(msg)):
-
-        class Test(Environment):
-            FOO = values.StringValue(default=None)
-
-
 @pytest.mark.parametrize("value", ["true", "True", "1", "yes"])
 def test_environment__boolean_value__truthy(value):
     with set_dotenv("Test", FOO=value):

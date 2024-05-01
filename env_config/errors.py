@@ -11,6 +11,7 @@ if TYPE_CHECKING:
 __all__ = [
     "DjangoEnvConfigError",
     "MissingEnvValueError",
+    "MissingExtraDependencyError",
 ]
 
 
@@ -29,3 +30,7 @@ class MissingEnvValueError(DjangoEnvConfigError):
             msg += " needs a default value since environment does not define a `dotenv_path`"
 
         super().__init__(msg)
+
+
+class MissingExtraDependencyError(DjangoEnvConfigError):
+    """Base class for all Django Environment Config errors."""

@@ -21,6 +21,7 @@ class set_dotenv:
     def __init__(self, env: str, /, **values: Any) -> None:
         self.env = env
         path = Environment.load_dotenv.__module__ + "." + Environment.load_dotenv.__qualname__
+        self.values = values
         self.patch = patch(path, return_value=values)
 
     def __call__(self, func: Callable[P, T]) -> Callable[P, T]:
@@ -38,6 +39,8 @@ class set_dotenv:
 
     def __exit__(self, *args):
         os.environ.pop("DJANGO_SETTINGS_ENVIRONMENT", None)
+        for value in self.values:
+            os.environ.pop(value, None)
         return self.patch.__exit__(*args)
 
 

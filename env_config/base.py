@@ -40,7 +40,7 @@ class Environment:
         """
         When a subclass of environment is created, try to immediately load the settings
         and set them in the module globals where the environment is defined, if the environment matches
-        what has been selected in the `DJANGO_SETTINGS_ENVIRONMENT` environment variable.
+        what has been selected with the `DJANGO_SETTINGS_ENVIRONMENT` environment variable.
 
         :param dotenv_path: The path to the `.env` file to load. If set to `None`, the `.env` file will not be loaded.
                             By default, `python-dotenv` will try to find the `.env` file automatically.
@@ -51,16 +51,16 @@ class Environment:
             msg = f"Environment variable {ENV_NAME!r} must be set before subclassing 'Environment'"
             raise ValueError(msg)
 
-        # If the environment does not match, do not load environment or even the `.env` file.
-        if cls.__name__ != env:
+        # If the environment does not match, do not load the environment or even the `.env` file.
+        if cls.__name__.casefold() != env.casefold():
             return
 
         # If set to `None` explicitly, or using environment, do not load a `.env` file.
         if dotenv_path is None or use_environ:
             dotenv_path = Undefined
 
-        # If not given, set it to `None` so that `python-dotenv` will use
-        # `dotenv.main.find_dotenv` to find the `.env` file automatically.
+        # If not given, set it to `None` so the `dotenv.main.find_dotenv`
+        # will try to find the `.env` file automatically.
         elif dotenv_path is Undefined:
             dotenv_path = None
 
@@ -101,8 +101,8 @@ class Environment:
         """Load settings and set them in the module globals where the environment is defined."""
         settings = cls.load_settings()
         stack = inspect.stack()
-        caller_globals: dict[str, Any] = stack[stack_level].frame.f_globals
-        caller_globals.update(**settings)
+        module_globals: dict[str, Any] = stack[stack_level].frame.f_globals
+        module_globals.update(**settings)
 
     @classmethod
     def post_setup(cls) -> None:

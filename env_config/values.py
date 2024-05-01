@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 from django.utils.module_loading import import_string
 
 from .constants import Undefined
-from .errors import MissingEnvValueError
+from .errors import MissingEnvValueError, MissingExtraDependencyError
 from .typing import Any, CacheConfig, DBConfig, DBConfigExtra, Generator, Generic, Mapping, Sequence, TypeVar, Unpack
 
 if TYPE_CHECKING:
@@ -51,18 +51,18 @@ class Value(ABC, Generic[T]):
         self,
         *,
         default: T | None = Undefined,
-        env_name: str | Undefined = Undefined,
-        nullable: bool = False,
+        env_name: str | None | Undefined = Undefined,
     ) -> None:
         """
         Value descriptor for an environment variable.
 
         :param default: The default value to use if the environment variable is not set.
         :param env_name: The name of the environment variable to use. If not given, the name of the field is used.
+                         Set this to `None` to skip loading the value from the environment.
         """
         self.default: T | None = default
         self.name: str = env_name
-        self.nullable: bool = nullable
+        self.skip_env: bool = env_name is None
 
         # Use a map to store the value per environment so that we can have
         # different values for environments what inherit from each other.
@@ -71,7 +71,7 @@ class Value(ABC, Generic[T]):
 
     def __set_name__(self, env: type[Environment], name: str) -> None:
         """Called after the owner Environment-class is created with this field as a class attribute."""
-        if self.name is Undefined:
+        if self.name in (Undefined, None):
             self.name = name
 
     def __get__(self, _: Environment | None, env: type[Environment]) -> T:
@@ -83,15 +83,12 @@ class Value(ABC, Generic[T]):
         return self.value_by_environment[env]
 
     def get_for_environment(self, env: type[Environment]) -> T:
-        value = self.default if env.dotenv is Undefined else env.dotenv.get(self.name, self.default)
+        value = self.default if env.dotenv is Undefined or self.skip_env else env.dotenv.get(self.name, self.default)
         if value is Undefined:
             raise MissingEnvValueError(name=self.name, env=env)
 
         if value is None:
-            if self.nullable:
-                return None
-            msg = f"Value for {self.name!r} cannot be None"
-            raise ValueError(msg)
+            return None
 
         return self.convert(value)
 
@@ -164,18 +161,17 @@ class ImportStringValue(Value[str]):
 
 
 class SequenceValue(Value, ABC, Generic[T]):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         child: Value[T] | None = None,
         *,
         default: Sequence[T] | None = Undefined,
         env_name: str | Undefined = Undefined,
-        nullable: bool = False,
         delimiter: str = ",",
     ) -> None:
         self.child = child or StringValue()
         self.delimiter = delimiter
-        super().__init__(default=default, env_name=env_name, nullable=nullable)
+        super().__init__(default=default, env_name=env_name)
 
     def iterate(self, value: str | Sequence[Any]) -> Generator[T, None, None]:
         seq = value.split(self.delimiter) if isinstance(value, str) else value
@@ -214,14 +210,13 @@ class MappingValue(Value, ABC, Generic[T]):
         *,
         default: Mapping[str, T] | None = Undefined,
         env_name: str | Undefined = Undefined,
-        nullable: bool = False,
         kv_delimiter: str = "=",
         item_delimiter: str = ";",
     ) -> None:
         self.child = child or StringValue()
         self.kv_delimiter = kv_delimiter
         self.item_delimiter = item_delimiter
-        super().__init__(default=default, env_name=env_name, nullable=nullable)
+        super().__init__(default=default, env_name=env_name)
 
     def iterate(self, value: str | Mapping[str, Any]) -> Generator[tuple[str, Any], None, None]:
         seq = value.split(self.item_delimiter) if isinstance(value, str) else value.items()
@@ -295,11 +290,10 @@ class RegexValue(StringValue):
         *,
         regex: str,
         default: str | None = Undefined,
-        nullable: bool = False,
         env_name: str | Undefined = Undefined,
     ) -> None:
         self.regex = regex
-        super().__init__(default=default, env_name=env_name, nullable=nullable)
+        super().__init__(default=default, env_name=env_name)
 
     def convert(self, value: str) -> str:
         from django.core.validators import RegexValidator
@@ -316,11 +310,10 @@ class PathValue(StringValue):
         *,
         default: str | None = Undefined,
         env_name: str | Undefined = Undefined,
-        nullable: bool = False,
         check_exists: bool = True,
     ) -> None:
         self.check_exists = check_exists
-        super().__init__(default=default, env_name=env_name, nullable=nullable)
+        super().__init__(default=default, env_name=env_name)
 
     def convert(self, value: str) -> str:
         path = Path(value).absolute()
@@ -350,7 +343,15 @@ class DatabaseURLValue(Value[DBConfig | str]):
         if not isinstance(value, str):
             return {self.db_alias: value}
 
-        from dj_database_url import parse
+        try:
+            from dj_database_url import parse
+        except ImportError as error:  # pragma: no cover
+            msg = (
+                "You must install the 'db' extra dependency "
+                "(e.g., `pip install django-environment-config[db]`) "
+                "to use the DatabaseURLValue."
+            )
+            raise MissingExtraDependencyError(msg) from error
 
         config = parse(value, **self.params)
         return {self.db_alias: config}
@@ -373,7 +374,15 @@ class CacheURLValue(Value[CacheConfig | str]):
         if not isinstance(value, str):
             return {self.cache_alias: value}
 
-        from django_cache_url import parse
+        try:
+            from django_cache_url import parse
+        except ImportError as error:  # pragma: no cover
+            msg = (
+                "You must install the 'cache' extra dependency "
+                "(e.g., `pip install django-environment-config[cache]`) "
+                "to use the CacheURLValue."
+            )
+            raise MissingExtraDependencyError(msg) from error
 
         config = parse(value)
         return {self.cache_alias: config}
