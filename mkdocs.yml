@@ -2,6 +2,10 @@ site_name: Django Environment Config
 
 nav:
   - Home: index.md
+  - Basics: basics.md
+  - Configuration: config.md
+  - Hooks: hooks.md
+  - Testing: testing.md
 
 theme:
   name: readthedocs

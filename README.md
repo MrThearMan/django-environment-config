@@ -23,7 +23,36 @@ pip install django-environment-config
 
 ---
 
-Configure django settings for multiple environments.
+Inspired by [django-configurations], this library aims to provide a simple way to configure
+settings for different environments in Django applications. For example, you might want to
+have different settings for local development compared to production, and different still when
+running automated tests or in checks in you CI.
+
+## Overview
+
+Environments are defined with a simple class-based configuration in the `settings.py` module.
+
+```python
+from env_config import Environment, values
+
+class Example(Environment):
+    DEBUG = True
+    SECRET_KEY = values.StringValue()
+    ALLOWED_HOSTS = values.ListValue(default=["*"])
+    DATABASES = values.DatabaseURLValue()
+```
+
+The Environment must be selected by setting the `DJANGO_SETTINGS_ENVIRONMENT`
+environment variable to the name of the class.
+
+```shell
+DJANGO_SETTINGS_ENVIRONMENT=Example python manage.py runserver
+```
+
+Check out the [docs] for more information.
+
+[django-configurations]: https://github.com/jazzband/django-configurations
+[docs]: https://mrthearman.github.io/django-environment-config/
 
 [coverage-badge]: https://coveralls.io/repos/github/MrThearMan/django-environment-config/badge.svg?branch=main
 [status-badge]: https://img.shields.io/github/actions/workflow/status/MrThearMan/django-environment-config/test.yml?branch=main
