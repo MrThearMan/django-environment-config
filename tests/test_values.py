@@ -2,6 +2,7 @@ import re
 from decimal import Decimal, InvalidOperation
 from json import JSONDecodeError
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from django.core.exceptions import ValidationError
@@ -502,6 +503,21 @@ def test_environment__path_value__check_exists():
             FOO = values.PathValue()
 
         assert Test.FOO
+
+
+def test_environment__path_value__create_if_missing():
+    path = (Path.cwd() / "foo").absolute()
+    with (
+        set_dotenv("Test", FOO="foo"),
+        patch("env_config.values.Path.mkdir") as create,
+        patch("env_config.values.Path.exists", return_value=True),
+    ):
+
+        class Test(Environment):
+            FOO = values.PathValue(create_if_missing=True)
+
+    assert str(path) == Test.FOO
+    assert create.called
 
 
 @pytest.mark.parametrize(

@@ -305,18 +305,24 @@ class RegexValue(StringValue):
 class PathValue(StringValue):
     """Parses env variable into a string value, and can optionally validate that the path exists."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         *,
         default: str | None = Undefined,
         env_name: str | None | Undefined = Undefined,
         check_exists: bool = True,
+        create_if_missing: bool = False,
+        mode: int = 0o777,
     ) -> None:
         self.check_exists = check_exists
+        self.create_if_missing = create_if_missing
+        self.mode = mode
         super().__init__(default=default, env_name=env_name)
 
     def convert(self, value: str) -> str:
         path = Path(value).absolute()
+        if self.create_if_missing:
+            path.mkdir(mode=self.mode, parents=True, exist_ok=True)
         if self.check_exists and not path.exists():
             msg = f"Path '{path}' does not exist"
             raise ValueError(msg)
