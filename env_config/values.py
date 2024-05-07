@@ -392,3 +392,28 @@ class CacheURLValue(Value[CacheConfig | str]):
 
         config = parse(value)
         return {self.cache_alias: config}
+
+
+class ParentValue(Value[T]):
+    """Parses value from the parent environment, or the default value if parent doesn't have the value."""
+
+    def __init__(
+        self,
+        child: Value[T] | None = None,
+        *,
+        default: T | None,
+        env_name: str | None | Undefined = Undefined,
+    ) -> None:
+        self.child = child or StringValue()
+        self.env: type[Environment] | None = None
+        super().__init__(default=default, env_name=env_name)
+
+    def get_for_environment(self, env: type[Environment]) -> None:
+        for parent in env.mro()[1:]:
+            value: Any = getattr(parent, self.name, Undefined)
+            if value is not Undefined:
+                return self.convert(value)
+        return self.convert(self.default)
+
+    def convert(self, value: str | T) -> T:
+        return self.child.convert(value)
