@@ -403,13 +403,15 @@ class ParentValue(Value[T]):
         *,
         default: T | None,
         env_name: str | None | Undefined = Undefined,
+        check_limit: int | None = None,
     ) -> None:
         self.child = child or StringValue()
         self.env: type[Environment] | None = None
+        self.check_limit = check_limit
         super().__init__(default=default, env_name=env_name)
 
     def get_for_environment(self, env: type[Environment]) -> None:
-        for parent in env.mro()[1:]:
+        for parent in env.mro()[slice(1, self.check_limit)]:
             value: Any = getattr(parent, self.name, Undefined)
             if value is not Undefined:
                 return self.convert(value)

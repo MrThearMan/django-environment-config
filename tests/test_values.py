@@ -789,3 +789,16 @@ def test_environment__parent_value__default():
         BAR = values.ParentValue(default="4")
 
     assert Test.BAR == "4"
+
+
+@set_dotenv("Test", FOO="1")
+def test_environment__parent_value__check_limit():
+    class Common(Environment):
+        FOO = "2"
+
+    class Mixin: ...
+
+    class Test(Mixin, Common):
+        FOO = values.ParentValue(default="3", check_limit=1)
+
+    assert Test.FOO == "3"
