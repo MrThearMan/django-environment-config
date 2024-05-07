@@ -407,7 +407,7 @@ class ParentValue(Value[T]):
     ) -> None:
         self.child = child or StringValue()
         self.env: type[Environment] | None = None
-        self.check_limit = check_limit
+        self.check_limit = check_limit if check_limit is None else check_limit + 1
         super().__init__(default=default, env_name=env_name)
 
     def get_for_environment(self, env: type[Environment]) -> None:
