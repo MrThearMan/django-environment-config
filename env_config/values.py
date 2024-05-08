@@ -395,7 +395,7 @@ class CacheURLValue(Value[CacheConfig | str]):
 
 
 class ParentValue(Value[T]):
-    """Parses value from the parent environment, or the default value if parent doesn't have the value."""
+    """Parses value from a parent class, or the default value if parent doesn't have the value."""
 
     def __init__(
         self,

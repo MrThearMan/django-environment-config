@@ -205,6 +205,8 @@ Otherwise, an exception will be raised.
 A value descriptor for directory path values. Accepts the following additional arguments:
 
 - `check_exists`: Whether to check if the path exists or not. Defaults to `True`.
+- `create_if_missing`: If `True`, create the path if it doesn't exist. Defaults to `False`.
+- `mode`: The mode to use when creating the path if it doesn't exist. Defaults to `0o777`.
 
 The `convert` method will return the value as is if it's a valid directory path.
 Otherwise, an exception will be raised.
@@ -235,10 +237,18 @@ library to parse the setting from a `CACHE_URL` environment variable. See the li
 The `convert` method will convert the value to a dictionary that can be used as the `CACHES` setting,
 if it can be parsed. Otherwise, an exception will be raised.
 
-[python-dotenv]: https://github.com/theskumar/python-dotenv
-[dj_database_url]: https://github.com/jazzband/dj-database-url/
-[django_cache_url]: https://pypi.org/project/django-cache-url/
+### ParentValue
 
+A value descriptor for getting the value from a parent class. Tries to find the value
+in method resolution order, but if no parent has a matching value, the default value
+(note: required for this descriptor) is used. Accepts the following additional arguments:
+
+- `child`: A value descriptor to use for the found value items. If not set, value will
+  be interpreted as a string.
+- `check_limit`: The maximum number of parents to check. Defaults to `None`, which means
+  the value will be looked up in all parents.
+
+The `convert` method will convert the found value using the child value descriptor converter.
 
 ## Computed properties
 
@@ -260,6 +270,21 @@ class Example(Environment):
     def LOG_LEVEL(cls):
         return "DEBUG" if cls.DEBUG else "INFO"
 ```
+
+> Note that value descriptors are only bound to the environment values _after_
+> the class is created, so if you try to use them in the class body before that,
+> they will be plain classes, not descriptors.
+>
+> ```python
+> from env_config import Environment, values
+>
+> class Example(Environment):
+>     DEBUG = values.BooleanValue(default=False)
+>
+>     # Debug is still a BoolenValue instance, not a descriptor.
+>     # It will always be truthy, and so LOG_LEVEL will always be "DEBUG".
+>     LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
+>```
 
 ## Configuration mixins
 
@@ -302,3 +327,26 @@ except ImportError:
 class Example(LocalMixin, Environment):
     pass
 ```
+
+Note, however, that mixins will not override values defined on the inheriting class.
+For this, you can use the `ParentValue` descriptor.
+
+```python
+# settings.py
+
+from env_config import Environment, values
+
+try:
+    from local_settings import LocalMixin
+except ImportError:
+    class LocalMixin: ...
+
+class Example(LocalMixin, Environment):
+    # Only check the LocalMixin class for the value,
+    # otherwise use the default value of False.
+    DEBUG = values.ParentValue(values.BooleanValue(), default=False, check_limit=1)
+```
+
+[python-dotenv]: https://github.com/theskumar/python-dotenv
+[dj_database_url]: https://github.com/jazzband/dj-database-url/
+[django_cache_url]: https://pypi.org/project/django-cache-url/
