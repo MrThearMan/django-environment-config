@@ -530,6 +530,7 @@ def test_environment__path_value__create_if_missing():
                 "default": {
                     "CONN_HEALTH_CHECKS": False,
                     "CONN_MAX_AGE": 0,
+                    "DISABLE_SERVER_SIDE_CURSORS": False,
                     "ENGINE": "django.db.backends.sqlite3",
                     "HOST": "",
                     "NAME": "/absolute/path/to/db/file.db",
@@ -545,6 +546,7 @@ def test_environment__path_value__create_if_missing():
                 "default": {
                     "CONN_HEALTH_CHECKS": False,
                     "CONN_MAX_AGE": 0,
+                    "DISABLE_SERVER_SIDE_CURSORS": False,
                     "ENGINE": "django.db.backends.mysql",
                     "HOST": "host",
                     "NAME": "dbname",
@@ -560,6 +562,7 @@ def test_environment__path_value__create_if_missing():
                 "default": {
                     "CONN_HEALTH_CHECKS": False,
                     "CONN_MAX_AGE": 0,
+                    "DISABLE_SERVER_SIDE_CURSORS": False,
                     "ENGINE": "django.db.backends.postgresql",
                     "HOST": "host",
                     "NAME": "dbname",
@@ -575,6 +578,7 @@ def test_environment__path_value__create_if_missing():
                 "default": {
                     "CONN_HEALTH_CHECKS": False,
                     "CONN_MAX_AGE": 0,
+                    "DISABLE_SERVER_SIDE_CURSORS": False,
                     "ENGINE": "django.contrib.gis.db.backends.postgis",
                     "HOST": "host",
                     "NAME": "dbname",
@@ -625,6 +629,7 @@ def test_environment__database_url__from_str_default():
         "default": {
             "CONN_HEALTH_CHECKS": False,
             "CONN_MAX_AGE": 0,
+            "DISABLE_SERVER_SIDE_CURSORS": False,
             "ENGINE": "django.contrib.gis.db.backends.postgis",
             "HOST": "host",
             "NAME": "dbname",
@@ -645,6 +650,7 @@ def test_environment__database_url__params():
         "default": {
             "CONN_HEALTH_CHECKS": False,
             "CONN_MAX_AGE": 60,
+            "DISABLE_SERVER_SIDE_CURSORS": False,
             "ENGINE": "django.contrib.gis.db.backends.postgis",
             "HOST": "host",
             "NAME": "dbname",
@@ -665,6 +671,7 @@ def test_environment__database_url__alias():
         "testing": {
             "CONN_HEALTH_CHECKS": False,
             "CONN_MAX_AGE": 0,
+            "DISABLE_SERVER_SIDE_CURSORS": False,
             "ENGINE": "django.contrib.gis.db.backends.postgis",
             "HOST": "host",
             "NAME": "dbname",

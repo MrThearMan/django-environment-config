@@ -31,6 +31,7 @@ __all__ = [
     "JsonValue",
     "ListValue",
     "MappingValue",
+    "ParentValue",
     "PathValue",
     "PositiveIntegerValue",
     "RegexValue",
