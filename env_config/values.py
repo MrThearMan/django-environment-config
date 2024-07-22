@@ -205,7 +205,7 @@ class SetValue(SequenceValue):
 
 
 class MappingValue(Value, ABC, Generic[T]):
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         child: Value[T] | None = None,
         *,
@@ -306,7 +306,7 @@ class RegexValue(StringValue):
 class PathValue(StringValue):
     """Parses env variable into a string value, and can optionally validate that the path exists."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         *,
         default: str | None = Undefined,
