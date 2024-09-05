@@ -7,8 +7,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 DEBUG = True
 SECRET_KEY = get_random_secret_key()
-ROOT_URLCONF = "tests.project.urls"
-WSGI_APPLICATION = "tests.project.wsgi.application"
+ROOT_URLCONF = "example_project.config.urls"
+WSGI_APPLICATION = "example_project.config.wsgi.application"
 
 ALLOWED_HOSTS = []
 
@@ -50,7 +50,7 @@ TEMPLATES = [
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "project" / "testdb",
+        "NAME": BASE_DIR / "config" / "testdb",
     }
 }
 
