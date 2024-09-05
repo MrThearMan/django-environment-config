@@ -31,7 +31,6 @@ __all__ = [
     "JsonValue",
     "ListValue",
     "MappingValue",
-    "ParentValue",
     "PathValue",
     "PositiveIntegerValue",
     "RegexValue",
@@ -393,30 +392,3 @@ class CacheURLValue(Value[CacheConfig | str]):
 
         config = parse(value)
         return {self.cache_alias: config}
-
-
-class ParentValue(Value[T]):
-    """Parses value from a parent class, or the default value if parent doesn't have the value."""
-
-    def __init__(
-        self,
-        child: Value[T] | None = None,
-        *,
-        default: T | None,
-        env_name: str | None | Undefined = Undefined,
-        check_limit: int | None = None,
-    ) -> None:
-        self.child = child or StringValue()
-        self.env: type[Environment] | None = None
-        self.check_limit = check_limit if check_limit is None else check_limit + 1
-        super().__init__(default=default, env_name=env_name)
-
-    def get_for_environment(self, env: type[Environment]) -> None:
-        for parent in env.mro()[slice(1, self.check_limit)]:
-            value: Any = getattr(parent, self.name, Undefined)
-            if value is not Undefined:
-                return self.convert(value)
-        return self.convert(self.default)
-
-    def convert(self, value: str | T) -> T:
-        return self.child.convert(value)

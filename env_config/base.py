@@ -36,6 +36,7 @@ class Environment:
         *,
         dotenv_path: StrPath | None | Undefined = Undefined,
         use_environ: bool = False,
+        overrides_from: type | None = None,
     ) -> None:
         """
         When a subclass of environment is created, try to immediately load the settings
@@ -45,7 +46,14 @@ class Environment:
         :param dotenv_path: The path to the `.env` file to load. If set to `None`, the `.env` file will not be loaded.
                             By default, `python-dotenv` will try to find the `.env` file automatically.
         :param use_environ: If set to `True`, use environment variables instead of using a `.env` file.
+        :param overrides_from: If set, the values from this class will be used as overrides for the values in the
+                               environment.
         """
+        if overrides_from is not None:
+            for name, value in overrides_from.__dict__.items():
+                if name.isupper() and not name.startswith("_"):
+                    setattr(cls, name, value)
+
         env: str | None = os.environ.get(ENV_NAME)
         if env is None:  # pragma: no cover
             msg = f"Environment variable {ENV_NAME!r} must be set before subclassing 'Environment'"

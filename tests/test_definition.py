@@ -93,6 +93,39 @@ def test_environment__use_environ():
     assert Test.FOO == "bar"
 
 
+@set_dotenv("Test", FOO="bar")
+def test_environment__overrides_from():
+    class Overrides:
+        FOO = "foo"
+
+    class Test(Environment, overrides_from=Overrides):
+        FOO = values.StringValue()
+
+    assert Test.FOO == "foo"
+
+
+@set_dotenv("Test")
+def test_environment__overrides_from__value_descriptor():
+    class Overrides:
+        FOO = values.StringValue(default="foo")
+
+    class Test(Environment, overrides_from=Overrides):
+        FOO = values.StringValue()
+
+    assert Test.FOO == "foo"
+
+
+@set_dotenv("Test", FOO="foo")
+def test_environment__overrides_from__value_descriptor__no_default():
+    class Overrides:
+        FOO = values.StringValue()
+
+    class Test(Environment, overrides_from=Overrides):
+        FOO = values.StringValue(default="bar")
+
+    assert Test.FOO == "foo"
+
+
 @set_dotenv("Test")
 def test_environment__default():
     class Test(Environment):

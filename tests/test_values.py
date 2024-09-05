@@ -8,7 +8,6 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from env_config import Environment, values
-from env_config.errors import MissingEnvValueError
 from tests.helpers import set_dotenv
 
 
@@ -732,80 +731,3 @@ def test_environment__cache_url__from_str_default():
         }
     }
 
-
-@set_dotenv("Test", FOO="1")
-def test_environment__parent_value():
-    class Common(Environment):
-        FOO = "2"
-
-    class Mixin:
-        FOO = "3"
-
-    class Test(Mixin, Common):
-        FOO = values.ParentValue(default="4")
-
-    assert Test.FOO == "3"
-
-
-@set_dotenv("Test", FOO="1")
-def test_environment__parent_value__skip_one_parent():
-    class Common(Environment):
-        FOO = "2"
-
-    class Mixin: ...
-
-    class Test(Mixin, Common):
-        FOO = values.ParentValue(default="3")
-
-    assert Test.FOO == "2"
-
-
-@set_dotenv("Test", FOO="1")
-def test_environment__parent_value__descriptor():
-    class Common(Environment):
-        FOO = values.StringValue(default="2")
-
-    class Test(Common):
-        FOO = values.ParentValue(default="3")
-
-    assert Test.FOO == "2"
-
-
-@set_dotenv("Test", FOO="1")
-def test_environment__parent_value__descriptor__no_default():
-    # This does not work, since Common environment is not loaded
-    # because it's not the selected environment.
-    class Common(Environment):
-        FOO = values.StringValue()
-
-    with pytest.raises(MissingEnvValueError):
-
-        class Test(Common):
-            FOO = values.ParentValue(default="3")
-
-
-@set_dotenv("Test", FOO="1")
-def test_environment__parent_value__default():
-    class Common(Environment):
-        FOO = "2"
-
-    class Mixin:
-        FOO = "3"
-
-    class Test(Mixin, Common):
-        BAR = values.ParentValue(default="4")
-
-    assert Test.BAR == "4"
-
-
-@set_dotenv("Test", FOO="1")
-def test_environment__parent_value__check_limit():
-    class Common(Environment):
-        FOO = "2"
-
-    class Mixin: ...
-
-    class Test(Mixin, Common):
-        FOO = values.ParentValue(default="3", check_limit=1)
-
-    assert Test.FOO == "3"

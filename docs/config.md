@@ -289,6 +289,7 @@ class Example(Environment):
 ## Configuration mixins
 
 Mixin-classes can be a useful way to reuse setting for multiple environments.
+Remember to add the mixin first, and the Environment second.
 
 ```python
 from env_config import Environment
@@ -304,13 +305,22 @@ class Prod(Defaults, Environment):
     pass
 ```
 
-One useful application for this is to provide a `local_settings.py` file that
-is ignored from versioning, and contains a mixin for overriding settings locally.
+Note, however, that mixins will not override values defined on the inheriting class.
+For this, use the [overrides](#overrides) feature.
+
+## Overrides
+
+For local development, one useful pattern for overriding settings is to provide
+a `local_settings.py` file that is ignored from versioning, and contains a mixin
+for overriding settings locally. This mixin can then be imported to the `settings.py`
+file, and added to the Environment using the `overrides_from` argument. This way,
+any settings defined in the mixin will be used, even if the same settings are
+also defined in the created Environment itself.
 
 ```python
 # local_settings.py
 
-class LocalMixin:
+class LocalOverrides:
     DEBUG = True
 ```
 
@@ -319,33 +329,17 @@ class LocalMixin:
 
 from env_config import Environment
 
+# Import mixin which is ignored from version control.
+# Catch import errors, since the mixin is not there in production.
 try:
-    from local_settings import LocalMixin
+    from local_settings import LocalOverrides
 except ImportError:
-    class LocalMixin: ...
+    class LocalOverrides: ...
 
-class Example(LocalMixin, Environment):
+class Example(Environment, overrides_from=LocalOverrides):
     pass
 ```
 
-Note, however, that mixins will not override values defined on the inheriting class.
-For this, you can use the `ParentValue` descriptor.
-
-```python
-# settings.py
-
-from env_config import Environment, values
-
-try:
-    from local_settings import LocalMixin
-except ImportError:
-    class LocalMixin: ...
-
-class Example(LocalMixin, Environment):
-    # Only check the LocalMixin class for the value,
-    # otherwise use the default value of False.
-    DEBUG = values.ParentValue(values.BooleanValue(), default=False, check_limit=1)
-```
 
 [python-dotenv]: https://github.com/theskumar/python-dotenv
 [dj_database_url]: https://github.com/jazzband/dj-database-url/
