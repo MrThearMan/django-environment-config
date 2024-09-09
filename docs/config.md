@@ -237,19 +237,6 @@ library to parse the setting from a `CACHE_URL` environment variable. See the li
 The `convert` method will convert the value to a dictionary that can be used as the `CACHES` setting,
 if it can be parsed. Otherwise, an exception will be raised.
 
-### ParentValue
-
-A value descriptor for getting the value from a parent class. Tries to find the value
-in method resolution order, but if no parent has a matching value, the default value
-(note: required for this descriptor) is used. Accepts the following additional arguments:
-
-- `child`: A value descriptor to use for the found value items. If not set, value will
-  be interpreted as a string.
-- `check_limit`: The maximum number of parents to check. Defaults to `None`, which means
-  the value will be looked up in all parents.
-
-The `convert` method will convert the found value using the child value descriptor converter.
-
 ## Computed properties
 
 In addition to value descriptors and regular class attributes, you can also use

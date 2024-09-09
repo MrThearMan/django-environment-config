@@ -31,7 +31,7 @@ class Environment:
     >>>     pass
     """
 
-    def __init_subclass__(
+    def __init_subclass__(  # noqa: C901
         cls,
         *,
         dotenv_path: StrPath | None | Undefined = Undefined,
@@ -87,8 +87,22 @@ class Environment:
         setattr(cls, f"_{cls.__name__}__dotenv_path", dotenv_path)
 
         cls.pre_setup()
+        if (
+            hasattr(overrides_from, "pre_setup")
+            and callable(overrides_from.pre_setup)
+            and hasattr(overrides_from.pre_setup, "__func__")
+        ):
+            overrides_from.pre_setup.__func__(cls)  # type: ignore[attr-defined]
+
         cls.setup(stack_level=2)
+
         cls.post_setup()
+        if (
+            hasattr(overrides_from, "post_setup")
+            and callable(overrides_from.post_setup)
+            and hasattr(overrides_from.post_setup, "__func__")
+        ):
+            overrides_from.post_setup.__func__(cls)  # type: ignore[attr-defined]
 
     @staticmethod
     def load_dotenv(*, dotenv_path: StrPath | None = None) -> dict[str, str]:  # pragma: no cover
