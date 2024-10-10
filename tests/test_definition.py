@@ -4,6 +4,7 @@ import pytest
 
 from env_config import Environment, values
 from env_config.constants import Undefined
+from env_config.decorators import classproperty
 from env_config.errors import MissingEnvValueError
 from tests.helpers import set_dotenv, set_environ
 
@@ -56,8 +57,7 @@ def test_environment__set_globals__classproperty():
     class Test(Environment):
         FOO = values.StringValue()
 
-        @classmethod
-        @property
+        @classproperty
         def BAR(cls):
             return f"{cls.FOO.upper()}"
 

@@ -32,6 +32,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Framework :: Django :: 4.2",
     "Framework :: Django :: 5.0",
     "Framework :: Django :: 5.1",
@@ -247,8 +248,18 @@ banned-from = [
     "yaml",
 ]
 
+[tool.ruff.lint.pep8-naming]
+classmethod-decorators = [
+    "classproperty",
+]
+
+[tool.ruff.lint.pydocstyle]
+property-decorators = [
+    "env_config.decorators.classproperty",
+]
+
 [tool.mypy]
-python_version = "3.12"
+python_version = "3.13"
 warn_return_any = "True"
 warn_unused_configs = "True"
 ignore_missing_imports = "True"
@@ -283,7 +294,7 @@ addopts = "-vv -s --disable-warnings"
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py{310, 311, 312}-django{42, 50, 51}
+envlist = py{310, 311, 312, 313}-django{42, 50, 51}
 isolated_build = true
 
 [gh-actions]
@@ -291,6 +302,7 @@ python =
     3.10: py310
     3.11: py311
     3.12: py312
+    3.13: py313
 
 [testenv]
 allowlist_externals =
