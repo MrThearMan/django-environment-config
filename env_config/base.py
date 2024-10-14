@@ -136,9 +136,9 @@ class Environment:
         return {name: getattr(cls, name) for name in dir(cls) if name.isupper() and not name.startswith("_")}
 
     @classproperty
-    def dotenv(cls) -> dict[str, str] | Undefined:  # noqa: N805
+    def dotenv(cls) -> dict[str, str] | Undefined:
         return getattr(cls, f"_{cls.__name__}__dotenv", Undefined)
 
     @classproperty
-    def dotenv_path(cls) -> str | None | Undefined:  # noqa: N805
+    def dotenv_path(cls) -> str | None | Undefined:
         return getattr(cls, f"_{cls.__name__}__dotenv_path", Undefined)
