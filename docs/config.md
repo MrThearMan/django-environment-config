@@ -245,15 +245,12 @@ requires values from other settings.
 
 ```python
 from env_config import Environment, values
+from env_config.decorators import classproperty
 
 class Example(Environment):
     DEBUG = values.BooleanValue(default=False)
 
-    # Use the `@classmethod` and `@property` decorator
-    # to create a classproperty. Since its name is in
-    # upper-case, it will be treated as a setting.
-    @classmethod
-    @property
+    @classproperty
     def LOG_LEVEL(cls):
         return "DEBUG" if cls.DEBUG else "INFO"
 ```
