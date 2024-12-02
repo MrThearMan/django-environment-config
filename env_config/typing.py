@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import sys
-from typing import Any, Callable, Generator, Generic, Mapping, ParamSpec, Sequence, TypedDict, TypeVar
+from collections.abc import Generator, Mapping, Sequence
+from typing import Any, Callable, Generic, ParamSpec, TypedDict, TypeVar
 
 if sys.version_info < (3, 12):  # pragma: no cover
     from typing_extensions import Unpack
