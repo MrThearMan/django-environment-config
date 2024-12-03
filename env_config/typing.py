@@ -4,10 +4,10 @@ import sys
 from collections.abc import Generator, Mapping, Sequence
 from typing import Any, Callable, Generic, ParamSpec, TypedDict, TypeVar
 
-if sys.version_info < (3, 12):  # pragma: no cover
-    from typing_extensions import Unpack
-else:
+if sys.version_info >= (3, 12):  # pragma: no cover
     from typing import Unpack
+else:  # pragma: no cover
+    from typing_extensions import Unpack
 
 __all__ = [
     "Any",
