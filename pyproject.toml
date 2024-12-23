@@ -70,7 +70,7 @@ pymdown-extensions = "10.12"
 mkdocs-mermaid2-plugin = "1.2.1"
 
 [tool.poetry.group.lint.dependencies]
-mypy = "1.13.0"
+mypy = "1.14.0"
 django-stubs = "5.1.1"
 
 [tool.poetry.extras]
