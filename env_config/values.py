@@ -247,7 +247,7 @@ class JsonValue(Value[dict | list]):
     """Parses env variables from a json string to a python list or dict."""
 
     def convert(self, value: str | list | dict) -> list | dict:
-        if isinstance(value, (list, dict)):
+        if isinstance(value, list | dict):
             return value
         return json.loads(value)
 
