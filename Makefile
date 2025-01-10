@@ -8,7 +8,6 @@
 .PHONY: lint
 .PHONY: migrate
 .PHONY: migrations
-.PHONY: mypy
 .PHONY: Makefile
 
 # Trick to allow passing commands to make
@@ -32,7 +31,6 @@ define helptext
   lint                 Run pre-commit hooks on all files.
   migrate              Run pre-commit hooks on all files.
   migrations           Run pre-commit hooks on all files.
-  mypy                 Run mypy on all files.
 
   Use quotes (" ") if command contains flags (-h / --help)
 endef
@@ -68,6 +66,3 @@ migrate:
 
 migrations:
 	@poetry run python manage.py makemigrations
-
-mypy:
-	@poetry run mypy env_config/
