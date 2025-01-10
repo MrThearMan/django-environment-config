@@ -32,11 +32,7 @@ classifiers = [
     "Framework :: Django :: 5.1",
 ]
 requires-python = ">=3.10,<4"
-dependencies = [
-    "Django>=4.2",
-    "python-dotenv>=1.0.1",
-    "typing-extensions>=4.11.0; python_version < '3.12'",
-]
+dynamic = ["dependencies"]
 
 [project.optional-dependencies]
 db = [
@@ -56,16 +52,21 @@ cache = [
 django_environment_config = "env_config_pytest_plugin.hooks"
 
 [tool.poetry]
+requires-poetry = ">=2.0.0"
 packages = [
     { include = "env_config" },
     { include = "env_config_pytest_plugin" },
 ]
 
+[tool.poetry.dependencies]
+Django = ">=4.2"
+python-dotenv = ">=1.0.1,<2"
+typing-extensions = { version = ">=4.11.0", python = "<3.12" }
+
 [tool.poetry.group.test.dependencies]
 pytest = "8.3.4"
 coverage = "7.6.10"
 pytest-django = "4.9.0"
-pre-commit = "4.0.1"
 tox = "4.23.2"
 tox-gh-actions = "3.2.0"
 
@@ -75,8 +76,7 @@ pymdown-extensions = "10.13"
 mkdocs-mermaid2-plugin = "1.2.1"
 
 [tool.poetry.group.lint.dependencies]
-mypy = "1.14.1"
-django-stubs = "5.1.1"
+pre-commit = "4.0.1"
 
 [tool.ruff]
 fix = true
@@ -252,15 +252,6 @@ classmethod-decorators = [
 [tool.ruff.lint.pydocstyle]
 property-decorators = [
     "env_config.decorators.classproperty",
-]
-
-[tool.mypy]
-python_version = "3.13"
-warn_return_any = "True"
-warn_unused_configs = "True"
-ignore_missing_imports = "True"
-plugins = [
-    "mypy_django_plugin.main",
 ]
 
 [tool.django-stubs]
