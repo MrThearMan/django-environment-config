@@ -158,6 +158,7 @@ lint.extend-select = [
     "UP042",    # replace-str-enum
 ]
 lint.ignore = [
+    "A005",     # Allow shadowing builtin modules
     "ANN401",   # Any-typing allowed
     "ARG001",   # Unused function argument
     "ARG002",   # Unused method argument
