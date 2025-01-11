@@ -18,6 +18,8 @@ Variables
     --undine-highlight-color: #23252d;
 
     --undine-scrollbar-color: #424242;
+
+    background-color: var(--undine-section-color);
 }
 
 /*
