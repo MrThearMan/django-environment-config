@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import contextlib
 import inspect
 import os
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from django.utils.functional import classproperty
@@ -76,7 +78,7 @@ class Environment:
         if use_environ:
             dotenv = os.environ.copy()
         elif dotenv_path is not Undefined:
-            dotenv = cls.load_dotenv(dotenv_path=dotenv_path)
+            dotenv = cls.load_dotenv(dotenv_path=dotenv_path, stack_level=2)
         else:
             dotenv = Undefined
 
@@ -105,10 +107,14 @@ class Environment:
             overrides_from.post_setup.__func__(cls)  # type: ignore[attr-defined]
 
     @staticmethod
-    def load_dotenv(*, dotenv_path: StrPath | None = None) -> dict[str, str]:  # pragma: no cover
+    def load_dotenv(*, dotenv_path: StrPath | None = None, stack_level: int = 1) -> dict[str, str]:  # pragma: no cover
         """Load the `.env` file and return the values."""
         if dotenv_path is None:
-            dotenv_path = find_dotenv(raise_error_if_not_found=True, usecwd=True)
+            # Set the working directory to the django project directory in case called from a tool
+            stack = inspect.stack()
+            settings_dir = Path(stack[stack_level].filename).parent
+            with contextlib.chdir(path=settings_dir):
+                dotenv_path = find_dotenv(raise_error_if_not_found=True, usecwd=True)
         return dotenv_values(dotenv_path=dotenv_path)
 
     @classmethod

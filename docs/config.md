@@ -101,7 +101,7 @@ A value descriptor for string values. The `convert` method will return the value
 
 A value descriptor for boolean values. The `convert` method will return `True` if the
 value is one of the following (case-insensitive): `yes`, `y`, `true`, or `1`.
-Conversly, the method will return `False` if the value is one of the following
+Conversely, the method will return `False` if the value is one of the following
 (case-insensitive): `no`, `n`, `false`, `0` or `""`. Otherwise, an exception will be raised.
 
 ### IntegerValue
@@ -265,7 +265,7 @@ class Example(Environment):
 > class Example(Environment):
 >     DEBUG = values.BooleanValue(default=False)
 >
->     # Debug is still a BoolenValue instance, not a descriptor.
+>     # Debug is still a BooleanValue instance, not a descriptor.
 >     # It will always be truthy, and so LOG_LEVEL will always be "DEBUG".
 >     LOG_LEVEL = "DEBUG" if DEBUG else "INFO"
 > ```

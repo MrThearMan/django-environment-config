@@ -30,6 +30,7 @@ classifiers = [
     "Framework :: Django :: 4.2",
     "Framework :: Django :: 5.0",
     "Framework :: Django :: 5.1",
+    "Framework :: Django :: 5.2",
 ]
 requires-python = ">=3.10,<4"
 dynamic = ["dependencies"]
@@ -52,7 +53,7 @@ packages = [
 
 [tool.poetry.dependencies]
 Django = ">=4.2"
-python-dotenv = ">=1.0.1,<2"
+python-dotenv = ">=1.1.1"
 typing-extensions = { version = ">=4.11.0", python = "<3.12" }
 dj-database-url = { version = ">=2.3.0", optional = true }
 django-cache-url = { version = ">=3.4.5", optional = true }
@@ -72,6 +73,10 @@ mkdocs-mermaid2-plugin = "1.2.1"
 
 [tool.poetry.group.lint.dependencies]
 pre-commit = "4.2.0"
+
+[tool.poetry.extras]
+cache = ["django-cache-url"]
+db = ["dj-database-url"]
 
 [tool.ruff]
 fix = true
@@ -119,6 +124,10 @@ lint.select = [
     "PGH",      # pygrep-hooks
     "PIE",      # flake8-pie
     "PL",       # pylint
+    "PLC",      # pylint convention
+    "PLE",      # pylint error
+    "PLR",      # pylint refactor
+    "PLW",      # pylint warning
     "PT",       # flake8-pytest-style
     "PTH",      # flake8-use-pathlib
     "PYI",      # flake8-pyi
@@ -165,6 +174,7 @@ lint.ignore = [
     "ARG003",   # Unused class method argument
     "RUF012",   # No need for ClassVar
     "G004",     # Logging statement uses f-string
+    "PLC0415",  # Imports not at top of file
     #
     # Conflicting with ruff-format
     #
@@ -277,7 +287,7 @@ addopts = "-vv -s --disable-warnings"
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = py{310, 311, 312, 313}-django{42, 50, 51}
+envlist = py{310, 311, 312, 313}-django{42, 50, 51, 52}
 isolated_build = true
 
 [gh-actions]
@@ -297,6 +307,7 @@ deps =
     django42: Django >=4.2,<4.3
     django50: Django >=5.0,<5.1
     django51: Django >=5.1,<5.2
+    django53: Django >=5.2,<5.3
 
     python-dotenv
     dj-database-url

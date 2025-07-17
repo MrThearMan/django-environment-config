@@ -602,6 +602,7 @@ def test_environment__database_url__from_dict_default():
     databases = {
         "CONN_HEALTH_CHECKS": False,
         "CONN_MAX_AGE": 0,
+        "DISABLE_SERVER_SIDE_CURSORS": False,
         "ENGINE": "django.contrib.gis.db.backends.postgis",
         "HOST": "host",
         "NAME": "dbname",
@@ -615,7 +616,7 @@ def test_environment__database_url__from_dict_default():
         class Test(Environment):
             DATABASES = values.DatabaseURLValue(default=databases)
 
-    assert Test.DATABASES == {"default": databases}
+    assert {"default": databases} == Test.DATABASES
 
 
 def test_environment__database_url__from_str_default():
@@ -715,7 +716,7 @@ def test_environment__cache_url__from_dict_default():
         class Test(Environment):
             CACHES = values.CacheURLValue(default=caches)
 
-    assert Test.CACHES == {"default": caches}
+    assert {"default": caches} == Test.CACHES
 
 
 def test_environment__cache_url__from_str_default():
@@ -730,4 +731,3 @@ def test_environment__cache_url__from_str_default():
             "LOCATION": "redis://master:6379/0",
         }
     }
-

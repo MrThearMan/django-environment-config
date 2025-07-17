@@ -360,7 +360,7 @@ class DatabaseURLValue(Value[DBConfig | str]):
             raise MissingExtraDependencyError(msg) from error
 
         config = parse(value, **self.params)
-        return {self.db_alias: config}
+        return {self.db_alias: config}  # type: ignore[return-value]
 
 
 class CacheURLValue(Value[CacheConfig | str]):
