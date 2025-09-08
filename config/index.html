@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Configuration - Django Environment Config</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link href="../css/docs.css" rel="stylesheet" />
+        <link href="../css/pygments.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Configuration";
+        var mkdocs_page_input_path = "config.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]--> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> Django Environment Config
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../basics/">Basics</a>
+                </li>
+              </ul>
+              <ul class="current">
+                <li class="toctree-l1 current"><a class="reference internal current" href="#">Configuration</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#loading-the-environment">Loading the Environment</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#value-descriptors">Value Descriptors</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#value">Value</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#stringvalue">StringValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#booleanvalue">BooleanValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#integervalue">IntegerValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#positiveintegervalue">PositiveIntegerValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#floatvalue">FloatValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#decimalvalue">DecimalValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#importstringvalue">ImportStringValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#sequencevalue">SequenceValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#listvalue">ListValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#tuplevalue">TupleValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#setvalue">SetValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#mappingvalue">MappingValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#dictvalue">DictValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#jsonvalue">JsonValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#emailvalue">EmailValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#urlvalue">URLValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#ipvalue">IPValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#regexvalue">RegexValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#pathvalue">PathValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#databaseurlvalue">DatabaseURLValue</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#cacheurlvalue">CacheURLValue</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#computed-properties">Computed properties</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#configuration-mixins">Configuration mixins</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#overrides">Overrides</a>
+    </li>
+    </ul>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../hooks/">Hooks</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../testing/">Testing</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">Django Environment Config</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Configuration</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">🔗</a></h1>
+<h2 id="loading-the-environment">Loading the Environment<a class="headerlink" href="#loading-the-environment" title="Permanent link">🔗</a></h2>
+<p>The library supports configurable settings using <a href="#value-descriptors">"value descriptors"</a>.
+These descriptors are used to define settings that can change their values
+based on a <code>.env</code> file or environment variables.</p>
+<p>By default, Environment-classes will look for a <code>.env</code> file from the current
+working directory up to the root using the <a href="https://github.com/theskumar/python-dotenv">python-dotenv</a> library.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-0-1">1</a></span>
+<span class="normal"><a href="#__codelineno-0-2">2</a></span>
+<span class="normal"><a href="#__codelineno-0-3">3</a></span>
+<span class="normal"><a href="#__codelineno-0-4">4</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">env_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">values</span>
+<a id="__codelineno-0-2" name="__codelineno-0-2"></a>
+<a id="__codelineno-0-3" name="__codelineno-0-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">Example</span><span class="p">(</span><span class="n">Environment</span><span class="p">):</span>
+<a id="__codelineno-0-4" name="__codelineno-0-4"></a>    <span class="n">DEBUG</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">BooleanValue</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<p>In case you want to use environment variables instead:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-1-1">1</a></span>
+<span class="normal"><a href="#__codelineno-1-2">2</a></span>
+<span class="normal"><a href="#__codelineno-1-3">3</a></span>
+<span class="normal"><a href="#__codelineno-1-4">4</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">env_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">values</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">Example</span><span class="p">(</span><span class="n">Environment</span><span class="p">,</span> <span class="n">use_environ</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4"></a>    <span class="n">DEBUG</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">BooleanValue</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<p>If a value matching the setting's name is found from the configured location,
+it will be used to set the value of the setting, given the specific descriptor
+is able to convert it to the type it expects.</p>
+<p>You can also set the path for the <code>.env</code> file directly if you wish.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-2-1">1</a></span>
+<span class="normal"><a href="#__codelineno-2-2">2</a></span>
+<span class="normal"><a href="#__codelineno-2-3">3</a></span>
+<span class="normal"><a href="#__codelineno-2-4">4</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">env_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">values</span>
+<a id="__codelineno-2-2" name="__codelineno-2-2"></a>
+<a id="__codelineno-2-3" name="__codelineno-2-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">Example</span><span class="p">(</span><span class="n">Environment</span><span class="p">,</span> <span class="n">dotenv_path</span><span class="o">=</span><span class="s2">&quot;/path/to/.env&quot;</span><span class="p">):</span>
+<a id="__codelineno-2-4" name="__codelineno-2-4"></a>    <span class="n">DEBUG</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">BooleanValue</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<p>Or you can disable the loading the <code>.env</code> file altogether.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-3-1">1</a></span>
+<span class="normal"><a href="#__codelineno-3-2">2</a></span>
+<span class="normal"><a href="#__codelineno-3-3">3</a></span>
+<span class="normal"><a href="#__codelineno-3-4">4</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">env_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">values</span>
+<a id="__codelineno-3-2" name="__codelineno-3-2"></a>
+<a id="__codelineno-3-3" name="__codelineno-3-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">Example</span><span class="p">(</span><span class="n">Environment</span><span class="p">,</span> <span class="n">dotenv_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<a id="__codelineno-3-4" name="__codelineno-3-4"></a>    <span class="n">DEBUG</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">BooleanValue</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<p>However, doing this with the above configuration will raise an error,
+since we cannot determine the value for <code>DEBUG</code>. Similarly, an error would be raised
+if the <code>.env</code> if loaded, but it does not contain a matching value for the setting.</p>
+<p>Therefore, we must set a default value in the descriptor for these cases.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-4-1">1</a></span>
+<span class="normal"><a href="#__codelineno-4-2">2</a></span>
+<span class="normal"><a href="#__codelineno-4-3">3</a></span>
+<span class="normal"><a href="#__codelineno-4-4">4</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">env_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">values</span>
+<a id="__codelineno-4-2" name="__codelineno-4-2"></a>
+<a id="__codelineno-4-3" name="__codelineno-4-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">Example</span><span class="p">(</span><span class="n">Environment</span><span class="p">):</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4"></a>    <span class="n">DEBUG</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">BooleanValue</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>The default value can also be <code>None</code>, but note that doing this will also skip
+the normal value conversion based on the descriptor type.</p>
+<p>In case the name of the setting in the <code>.env</code> file or environment is different from the
+name of the setting in the Environment class, you can specify the name of the matching
+setting in the descriptor using <code>env_name</code>.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-5-1">1</a></span>
+<span class="normal"><a href="#__codelineno-5-2">2</a></span>
+<span class="normal"><a href="#__codelineno-5-3">3</a></span>
+<span class="normal"><a href="#__codelineno-5-4">4</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">env_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">values</span>
+<a id="__codelineno-5-2" name="__codelineno-5-2"></a>
+<a id="__codelineno-5-3" name="__codelineno-5-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">Example</span><span class="p">(</span><span class="n">Environment</span><span class="p">):</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4"></a>    <span class="n">DEBUG</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">BooleanValue</span><span class="p">(</span><span class="n">env_name</span><span class="o">=</span><span class="s2">&quot;DJANGO_DEBUG_MODE&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>Setting <code>env_name</code> to <code>None</code> will make the descriptor always use the default value,
+even if the loaded environment contains a value for the setting. This can be useful
+if the value descriptor contains some useful validation or conversion logic that you
+want to use when setting the value.</p>
+<h2 id="value-descriptors">Value Descriptors<a class="headerlink" href="#value-descriptors" title="Permanent link">🔗</a></h2>
+<h3 id="value">Value<a class="headerlink" href="#value" title="Permanent link">🔗</a></h3>
+<p>The base class for all value descriptors. This is an abstract class that can't be
+used directly. All subclasses must implement the <code>convert</code> method, and can be initialized
+with the following arguments:</p>
+<ul>
+<li><code>default</code>: The default value for the setting. If not set, a value for the setting
+  must be found from the <code>.env</code> file or environment, or an exception will be raised.</li>
+<li><code>env_name</code>: The name of the setting in the <code>.env</code> file or environment. If not set,
+  the name of the setting in the Environment class is used. If set to <code>None</code>, the
+  descriptor will always use the <code>default</code> value.</li>
+</ul>
+<h3 id="stringvalue">StringValue<a class="headerlink" href="#stringvalue" title="Permanent link">🔗</a></h3>
+<p>A value descriptor for string values. The <code>convert</code> method will return the value as is.</p>
+<h3 id="booleanvalue">BooleanValue<a class="headerlink" href="#booleanvalue" title="Permanent link">🔗</a></h3>
+<p>A value descriptor for boolean values. The <code>convert</code> method will return <code>True</code> if the
+value is one of the following (case-insensitive): <code>yes</code>, <code>y</code>, <code>true</code>, or <code>1</code>.
+Conversely, the method will return <code>False</code> if the value is one of the following
+(case-insensitive): <code>no</code>, <code>n</code>, <code>false</code>, <code>0</code> or <code>""</code>. Otherwise, an exception will be raised.</p>
+<h3 id="integervalue">IntegerValue<a class="headerlink" href="#integervalue" title="Permanent link">🔗</a></h3>
+<p>A value descriptor for integer values. The <code>convert</code> method will return the value as an
+integer if it can be converted. Otherwise, an exception will be raised.</p>
+<h3 id="positiveintegervalue">PositiveIntegerValue<a class="headerlink" href="#positiveintegervalue" title="Permanent link">🔗</a></h3>
+<p>A value descriptor for positive integer values. The <code>convert</code> method will return the value
+as an integer if it can be converted and is greater than zero. Otherwise, an exception will
+be raised.</p>
+<h3 id="floatvalue">FloatValue<a class="headerlink" href="#floatvalue" title="Permanent link">🔗</a></h3>
+<p>A value descriptor for float values. The <code>convert</code> method will return the value as a float
+if it can be converted. Otherwise, an exception will be raised.</p>
+<h3 id="decimalvalue">DecimalValue<a class="headerlink" href="#decimalvalue" title="Permanent link">🔗</a></h3>
+<p>A value descriptor for decimal values. The <code>convert</code> method will return the value as a
+decimal if it can be converted. Otherwise, an exception will be raised.</p>
+<h3 id="importstringvalue">ImportStringValue<a class="headerlink" href="#importstringvalue" title="Permanent link">🔗</a></h3>
+<p>A value descriptor for string values that should be importable. The <code>convert</code> method will
+return the imported value if it can be imported. Otherwise, an exception will be raised.</p>
+<h3 id="sequencevalue">SequenceValue<a class="headerlink" href="#sequencevalue" title="Permanent link">🔗</a></h3>
+<p>An abstract value descriptor for sequences like lists, tuples, and sets. Cannot be used directly.
+Accepts the following additional arguments:</p>
+<ul>
+<li><code>child</code>: A value descriptor to use for the list items. If not set, the items will
+  be returned as strings.</li>
+<li><code>delimiter</code>: The delimiter to use when splitting the string into a list. Defaults to <code>,</code>.</li>
+</ul>
+<h3 id="listvalue">ListValue<a class="headerlink" href="#listvalue" title="Permanent link">🔗</a></h3>
+<p>A <a href="#SequenceValue">SequenceValue</a> descriptor for lists. The <code>convert</code> method will return the value as a
+list if it can be converted. Otherwise, an exception will be raised.</p>
+<h3 id="tuplevalue">TupleValue<a class="headerlink" href="#tuplevalue" title="Permanent link">🔗</a></h3>
+<p>A <a href="#SequenceValue">SequenceValue</a> descriptor for tuples. The <code>convert</code> method will return the value as a
+tuple if it can be converted. Otherwise, an exception will be raised.</p>
+<h3 id="setvalue">SetValue<a class="headerlink" href="#setvalue" title="Permanent link">🔗</a></h3>
+<p>A <a href="#SequenceValue">SequenceValue</a> descriptor for sets. The <code>convert</code> method will return the value as a
+sets if it can be converted. Otherwise, an exception will be raised.</p>
+<h3 id="mappingvalue">MappingValue<a class="headerlink" href="#mappingvalue" title="Permanent link">🔗</a></h3>
+<p>An abstract value descriptor for sequences like dicts. Cannot be used directly.
+Accepts the following additional arguments:</p>
+<ul>
+<li><code>child</code>: A value descriptor to use for the dict values. If not set, the items will
+  be returned as strings.</li>
+<li><code>kv_delimiter</code>: The delimiter to use when splitting items into keys and values. Defaults to <code>=</code>.</li>
+<li><code>item_delimiter</code>: The delimiter to use when splitting the string list of key-value pairs. Defaults to <code>;</code>.</li>
+</ul>
+<h3 id="dictvalue">DictValue<a class="headerlink" href="#dictvalue" title="Permanent link">🔗</a></h3>
+<p>A <a href="#MappingValue">MappingValue</a> descriptor for dicts. The <code>convert</code> method will return the value as a
+dict if it can be converted. Otherwise, an exception will be raised.</p>
+<h3 id="jsonvalue">JsonValue<a class="headerlink" href="#jsonvalue" title="Permanent link">🔗</a></h3>
+<p>A value descriptor for JSON values. The <code>convert</code> method will return the value as a
+valid JSON value if it can be converted. Otherwise, an exception will be raised.</p>
+<h3 id="emailvalue">EmailValue<a class="headerlink" href="#emailvalue" title="Permanent link">🔗</a></h3>
+<p>A value descriptor for email values. The <code>convert</code> method will return the value as is
+if it's a valid email address. Otherwise, an exception will be raised.</p>
+<h3 id="urlvalue">URLValue<a class="headerlink" href="#urlvalue" title="Permanent link">🔗</a></h3>
+<p>A value descriptor for URL values. The <code>convert</code> method will return the value as is
+if it's a valid URL. Otherwise, an exception will be raised.</p>
+<h3 id="ipvalue">IPValue<a class="headerlink" href="#ipvalue" title="Permanent link">🔗</a></h3>
+<p>A value descriptor for IP address values. The <code>convert</code> method will return the value as is
+if it's a valid IP address. Otherwise, an exception will be raised.</p>
+<h3 id="regexvalue">RegexValue<a class="headerlink" href="#regexvalue" title="Permanent link">🔗</a></h3>
+<p>A value descriptor for values that should match a regular expression.
+Accepts the following additional arguments:</p>
+<ul>
+<li><code>regex</code>: The regular expression pattern to match.</li>
+</ul>
+<p>The <code>convert</code> method will return the value as is if it matches the regular expression.
+Otherwise, an exception will be raised.</p>
+<h3 id="pathvalue">PathValue<a class="headerlink" href="#pathvalue" title="Permanent link">🔗</a></h3>
+<p>A value descriptor for directory path values. Accepts the following additional arguments:</p>
+<ul>
+<li><code>check_exists</code>: Whether to check if the path exists or not. Defaults to <code>True</code>.</li>
+<li><code>create_if_missing</code>: If <code>True</code>, create the path if it doesn't exist. Defaults to <code>False</code>.</li>
+<li><code>mode</code>: The mode to use when creating the path if it doesn't exist. Defaults to <code>0o777</code>.</li>
+</ul>
+<p>The <code>convert</code> method will return the value as is if it's a valid directory path.
+Otherwise, an exception will be raised.</p>
+<h3 id="databaseurlvalue">DatabaseURLValue<a class="headerlink" href="#databaseurlvalue" title="Permanent link">🔗</a></h3>
+<blockquote>
+<p>Requires the <code>db</code> extra dependency to be installed.
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-6-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1"></a>pip install django-environment-config[db]
+</code></pre></div></td></tr></table></div></p>
+</blockquote>
+<p>A value descriptor for configuring the <code>DATABASES</code> setting in Django. It uses the <a href="https://github.com/jazzband/dj-database-url/">dj_database_url</a>
+library to parse the setting from a <code>DATABASE_URL</code> environment variable. See the library for more details.</p>
+<p>The <code>convert</code> method will convert the value to a dictionary that can be used as the <code>DATABASES</code> setting,
+if it can be parsed. Otherwise, an exception will be raised.</p>
+<h3 id="cacheurlvalue">CacheURLValue<a class="headerlink" href="#cacheurlvalue" title="Permanent link">🔗</a></h3>
+<blockquote>
+<p>Requires the <code>cache</code> extra dependency to be installed.
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-7-1">1</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1"></a>pip install django-environment-config[cache]
+</code></pre></div></td></tr></table></div></p>
+</blockquote>
+<p>A value descriptor for configuring the <code>CACHES</code> setting in Django. It uses the <a href="https://pypi.org/project/django-cache-url/">django_cache_url</a>
+library to parse the setting from a <code>CACHE_URL</code> environment variable. See the library for more details.</p>
+<p>The <code>convert</code> method will convert the value to a dictionary that can be used as the <code>CACHES</code> setting,
+if it can be parsed. Otherwise, an exception will be raised.</p>
+<h2 id="computed-properties">Computed properties<a class="headerlink" href="#computed-properties" title="Permanent link">🔗</a></h2>
+<p>In addition to value descriptors and regular class attributes, you can also use
+classproperties to define computed settings. This can be useful if the setting
+requires values from other settings.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-8-1">1</a></span>
+<span class="normal"><a href="#__codelineno-8-2">2</a></span>
+<span class="normal"><a href="#__codelineno-8-3">3</a></span>
+<span class="normal"><a href="#__codelineno-8-4">4</a></span>
+<span class="normal"><a href="#__codelineno-8-5">5</a></span>
+<span class="normal"><a href="#__codelineno-8-6">6</a></span>
+<span class="normal"><a href="#__codelineno-8-7">7</a></span>
+<span class="normal"><a href="#__codelineno-8-8">8</a></span>
+<span class="normal"><a href="#__codelineno-8-9">9</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">env_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">values</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">env_config.decorators</span><span class="w"> </span><span class="kn">import</span> <span class="n">classproperty</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3"></a>
+<a id="__codelineno-8-4" name="__codelineno-8-4"></a><span class="k">class</span><span class="w"> </span><span class="nc">Example</span><span class="p">(</span><span class="n">Environment</span><span class="p">):</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5"></a>    <span class="n">DEBUG</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">BooleanValue</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6"></a>
+<a id="__codelineno-8-7" name="__codelineno-8-7"></a>    <span class="nd">@classproperty</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8"></a>    <span class="k">def</span><span class="w"> </span><span class="nf">LOG_LEVEL</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9"></a>        <span class="k">return</span> <span class="s2">&quot;DEBUG&quot;</span> <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">DEBUG</span> <span class="k">else</span> <span class="s2">&quot;INFO&quot;</span>
+</code></pre></div></td></tr></table></div>
+<blockquote>
+<p>Note that value descriptors are only bound to the environment values <em>after</em>
+the class is created, so if you try to use them in the class body before that,
+they will be plain classes, not descriptors.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-9-1">1</a></span>
+<span class="normal"><a href="#__codelineno-9-2">2</a></span>
+<span class="normal"><a href="#__codelineno-9-3">3</a></span>
+<span class="normal"><a href="#__codelineno-9-4">4</a></span>
+<span class="normal"><a href="#__codelineno-9-5">5</a></span>
+<span class="normal"><a href="#__codelineno-9-6">6</a></span>
+<span class="normal"><a href="#__codelineno-9-7">7</a></span>
+<span class="normal"><a href="#__codelineno-9-8">8</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">env_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">values</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2"></a>
+<a id="__codelineno-9-3" name="__codelineno-9-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">Example</span><span class="p">(</span><span class="n">Environment</span><span class="p">):</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4"></a>    <span class="n">DEBUG</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">BooleanValue</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5"></a>
+<a id="__codelineno-9-6" name="__codelineno-9-6"></a>    <span class="c1"># Debug is still a BooleanValue instance, not a descriptor.</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7"></a>    <span class="c1"># It will always be truthy, and so LOG_LEVEL will always be &quot;DEBUG&quot;.</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8"></a>    <span class="n">LOG_LEVEL</span> <span class="o">=</span> <span class="s2">&quot;DEBUG&quot;</span> <span class="k">if</span> <span class="n">DEBUG</span> <span class="k">else</span> <span class="s2">&quot;INFO&quot;</span>
+</code></pre></div></td></tr></table></div>
+</blockquote>
+<h2 id="configuration-mixins">Configuration mixins<a class="headerlink" href="#configuration-mixins" title="Permanent link">🔗</a></h2>
+<p>Mixin-classes can be a useful way to reuse setting for multiple environments.
+Remember to add the mixin first, and the Environment second.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-10-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-10-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-10-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-10-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-10-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-10-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-10-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-10-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-10-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-10-10">10</a></span>
+<span class="normal"><a href="#__codelineno-10-11">11</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">env_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2"></a>
+<a id="__codelineno-10-3" name="__codelineno-10-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">Defaults</span><span class="p">:</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4"></a>    <span class="n">ADMINS</span> <span class="o">=</span> <span class="p">[]</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5"></a>    <span class="o">...</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6"></a>
+<a id="__codelineno-10-7" name="__codelineno-10-7"></a><span class="k">class</span><span class="w"> </span><span class="nc">Local</span><span class="p">(</span><span class="n">Defaults</span><span class="p">,</span> <span class="n">Environment</span><span class="p">):</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8"></a>    <span class="k">pass</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9"></a>
+<a id="__codelineno-10-10" name="__codelineno-10-10"></a><span class="k">class</span><span class="w"> </span><span class="nc">Prod</span><span class="p">(</span><span class="n">Defaults</span><span class="p">,</span> <span class="n">Environment</span><span class="p">):</span>
+<a id="__codelineno-10-11" name="__codelineno-10-11"></a>    <span class="k">pass</span>
+</code></pre></div></td></tr></table></div>
+<p>Note, however, that mixins will not override values defined on the inheriting class.
+For this, use the <a href="#overrides">overrides</a> feature.</p>
+<h2 id="overrides">Overrides<a class="headerlink" href="#overrides" title="Permanent link">🔗</a></h2>
+<p>For local development, one useful pattern for overriding settings is to provide
+a <code>local_settings.py</code> file that is ignored from versioning, and contains a mixin
+for overriding settings locally. This mixin can then be imported to the <code>settings.py</code>
+file, and added to the Environment using the <code>overrides_from</code> argument. This way,
+any settings defined in the mixin will be used, even if the same settings are
+also defined in the created Environment itself.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-11-1">1</a></span>
+<span class="normal"><a href="#__codelineno-11-2">2</a></span>
+<span class="normal"><a href="#__codelineno-11-3">3</a></span>
+<span class="normal"><a href="#__codelineno-11-4">4</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1"></a><span class="c1"># local_settings.py</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2"></a>
+<a id="__codelineno-11-3" name="__codelineno-11-3"></a><span class="k">class</span><span class="w"> </span><span class="nc">LocalOverrides</span><span class="p">:</span>
+<a id="__codelineno-11-4" name="__codelineno-11-4"></a>    <span class="n">DEBUG</span> <span class="o">=</span> <span class="kc">True</span>
+</code></pre></div></td></tr></table></div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"><a href="#__codelineno-12-1"> 1</a></span>
+<span class="normal"><a href="#__codelineno-12-2"> 2</a></span>
+<span class="normal"><a href="#__codelineno-12-3"> 3</a></span>
+<span class="normal"><a href="#__codelineno-12-4"> 4</a></span>
+<span class="normal"><a href="#__codelineno-12-5"> 5</a></span>
+<span class="normal"><a href="#__codelineno-12-6"> 6</a></span>
+<span class="normal"><a href="#__codelineno-12-7"> 7</a></span>
+<span class="normal"><a href="#__codelineno-12-8"> 8</a></span>
+<span class="normal"><a href="#__codelineno-12-9"> 9</a></span>
+<span class="normal"><a href="#__codelineno-12-10">10</a></span>
+<span class="normal"><a href="#__codelineno-12-11">11</a></span>
+<span class="normal"><a href="#__codelineno-12-12">12</a></span>
+<span class="normal"><a href="#__codelineno-12-13">13</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1"></a><span class="c1"># settings.py</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2"></a>
+<a id="__codelineno-12-3" name="__codelineno-12-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">env_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">Environment</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4"></a>
+<a id="__codelineno-12-5" name="__codelineno-12-5"></a><span class="c1"># Import mixin which is ignored from version control.</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6"></a><span class="c1"># Catch import errors, since the mixin is not there in production.</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7"></a><span class="k">try</span><span class="p">:</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8"></a>    <span class="kn">from</span><span class="w"> </span><span class="nn">local_settings</span><span class="w"> </span><span class="kn">import</span> <span class="n">LocalOverrides</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9"></a><span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10"></a>    <span class="k">class</span><span class="w"> </span><span class="nc">LocalOverrides</span><span class="p">:</span> <span class="o">...</span>
+<a id="__codelineno-12-11" name="__codelineno-12-11"></a>
+<a id="__codelineno-12-12" name="__codelineno-12-12"></a><span class="k">class</span><span class="w"> </span><span class="nc">Example</span><span class="p">(</span><span class="n">Environment</span><span class="p">,</span> <span class="n">overrides_from</span><span class="o">=</span><span class="n">LocalOverrides</span><span class="p">):</span>
+<a id="__codelineno-12-13" name="__codelineno-12-13"></a>    <span class="k">pass</span>
+</code></pre></div></td></tr></table></div>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../basics/" class="btn btn-neutral float-left" title="Basics"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../hooks/" class="btn btn-neutral float-right" title="Hooks">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../basics/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../hooks/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
