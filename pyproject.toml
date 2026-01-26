@@ -60,13 +60,13 @@ django-cache-url = { version = ">=3.4.5", optional = true }
 
 [tool.poetry.group.test.dependencies]
 pytest = "9.0.2"
-coverage = "7.13.1"
+coverage = "7.13.2"
 pytest-django = "4.11.1"
 nox = "2025.11.12"
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = "1.6.1"
-pymdown-extensions = "10.20"
+pymdown-extensions = "10.20.1"
 pygments = "2.19.2"
 mkdocs-mermaid2-plugin = "1.2.3"
 
