@@ -46,11 +46,11 @@ def get_versions(pattern: re.Pattern[str]) -> list[str]:
 @nox.parametrize("django", django_versions())
 def tests(session: nox.Session, django: str) -> None:
     # Django 6.0 is only supports Python 3.12 and above
-    if session.python in {"3.10", "3.11"} and django == "6.0.*":
+    if session.python == "3.11" and django == "6.0.*":
         session.skip()
 
     # Python 3.14 only supported for Django 5.2 and above
-    if session.python == "3.14" and django in {"4.2.*", "5.0.*", "5.1.*"}:
+    if session.python == "3.14" and django in {"5.0.*", "5.1.*"}:
         session.skip()
 
     env = {
