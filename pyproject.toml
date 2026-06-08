@@ -52,7 +52,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-Django = ">=5.2.14"
+Django = ">=5.2.15"
 python-dotenv = ">=1.1.1"
 typing-extensions = { version = ">=4.11.0", python = "<3.12" }
 dj-database-url = { version = ">=2.3.0", optional = true }
