@@ -36,7 +36,7 @@ class Environment:
     def __init_subclass__(  # noqa: C901
         cls,
         *,
-        dotenv_path: StrPath | None | Undefined = Undefined,
+        dotenv_path: StrPath | Undefined | None = Undefined,
         use_environ: bool = False,
         overrides_from: type | None = None,
     ) -> None:
@@ -146,5 +146,5 @@ class Environment:
         return getattr(cls, f"_{cls.__name__}__dotenv", Undefined)
 
     @classproperty
-    def dotenv_path(cls) -> str | None | Undefined:
+    def dotenv_path(cls) -> str | Undefined | None:
         return getattr(cls, f"_{cls.__name__}__dotenv_path", Undefined)
