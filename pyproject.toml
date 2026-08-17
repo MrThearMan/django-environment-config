@@ -61,8 +61,8 @@ django-cache-url = { version = ">=3.4.5", optional = true }
 [tool.poetry.group.test.dependencies]
 pytest = "9.1.1"
 coverage = "7.15.4"
-pytest-django = "4.13.0"
-nox = "2026.7.11"
+pytest-django = "4.14.0"
+nox = "2026.8.10"
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = "1.6.1"
@@ -71,7 +71,7 @@ pygments = "2.20.0"
 mkdocs-mermaid2-plugin = "1.2.3"
 
 [tool.poetry.group.lint.dependencies]
-pre-commit = "4.6.1"
+pre-commit = "4.6.2"
 
 [tool.poetry.extras]
 cache = ["django-cache-url"]
