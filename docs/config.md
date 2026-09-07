@@ -12,6 +12,7 @@ working directory up to the root using the [python-dotenv] library.
 ```python
 from env_config import Environment, values
 
+
 class Example(Environment):
     DEBUG = values.BooleanValue()
 ```
@@ -20,6 +21,7 @@ In case you want to use environment variables instead:
 
 ```python
 from env_config import Environment, values
+
 
 class Example(Environment, use_environ=True):
     DEBUG = values.BooleanValue()
@@ -34,6 +36,7 @@ You can also set the path for the `.env` file directly if you wish.
 ```python
 from env_config import Environment, values
 
+
 class Example(Environment, dotenv_path="/path/to/.env"):
     DEBUG = values.BooleanValue()
 ```
@@ -42,6 +45,7 @@ Or you can disable the loading the `.env` file altogether.
 
 ```python
 from env_config import Environment, values
+
 
 class Example(Environment, dotenv_path=None):
     DEBUG = values.BooleanValue()
@@ -56,6 +60,7 @@ Therefore, we must set a default value in the descriptor for these cases.
 ```python
 from env_config import Environment, values
 
+
 class Example(Environment):
     DEBUG = values.BooleanValue(default=False)
 ```
@@ -69,6 +74,7 @@ setting in the descriptor using `env_name`.
 
 ```python
 from env_config import Environment, values
+
 
 class Example(Environment):
     DEBUG = values.BooleanValue(env_name="DJANGO_DEBUG_MODE")
@@ -247,6 +253,7 @@ requires values from other settings.
 from env_config import Environment, values
 from env_config.decorators import classproperty
 
+
 class Example(Environment):
     DEBUG = values.BooleanValue(default=False)
 
@@ -278,12 +285,15 @@ Remember to add the mixin first, and the Environment second.
 ```python
 from env_config import Environment
 
+
 class Defaults:
     ADMINS = []
     ...
 
+
 class Local(Defaults, Environment):
     pass
+
 
 class Prod(Defaults, Environment):
     pass
@@ -304,6 +314,7 @@ also defined in the created Environment itself.
 ```python
 # local_settings.py
 
+
 class LocalOverrides:
     DEBUG = True
 ```
@@ -318,7 +329,9 @@ from env_config import Environment
 try:
     from local_settings import LocalOverrides
 except ImportError:
+
     class LocalOverrides: ...
+
 
 class Example(Environment, overrides_from=LocalOverrides):
     pass

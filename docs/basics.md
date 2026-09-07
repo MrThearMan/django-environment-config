@@ -5,6 +5,7 @@ Environments are defined with a simple class-based configuration in the `setting
 ```python
 from env_config import Environment
 
+
 class Example(Environment):
     DEBUG = True
 ```
@@ -25,12 +26,14 @@ class creation process.
 ```python
 from env_config import Environment
 
+
 class Example(Environment):
     DEBUG = True
 
     # These will not be used
     not_global = None
     _NOT_GLOBAL = None
+
 
 # Exists immidiately after Example is defined,
 # given `DJANGO_SETTINGS_ENVIRONMENT=Example`
