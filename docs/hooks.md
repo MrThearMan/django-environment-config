@@ -11,11 +11,10 @@ environment has been loaded.
 ```python
 from env_config import Environment
 
-class Example(Environment):
 
+class Example(Environment):
     @classmethod
-    def pre_setup(cls):
-        ...
+    def pre_setup(cls): ...
 ```
 
 ## `post-setup`
@@ -25,11 +24,10 @@ This hook is called after the settings have been determined.
 ```python
 from env_config import Environment
 
-class Example(Environment):
 
+class Example(Environment):
     @classmethod
-    def post_setup(cls) -> None:
-        ...
+    def post_setup(cls) -> None: ...
 ```
 
 ## `load_dotenv`
@@ -42,11 +40,10 @@ It should return a mapping of the environment variables, where the keys and valu
 from env_config import Environment
 from dotenv.main import StrPath
 
-class Example(Environment):
 
+class Example(Environment):
     @staticmethod
-    def load_dotenv(*, dotenv_path: StrPath | None = None) -> dict[str, str]:
-        ...
+    def load_dotenv(*, dotenv_path: StrPath | None = None) -> dict[str, str]: ...
 ```
 
 [python-dotenv]: https://github.com/theskumar/python-dotenv

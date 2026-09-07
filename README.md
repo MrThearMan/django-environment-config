@@ -35,6 +35,7 @@ Environments are defined with a simple class-based configuration in the `setting
 ```python
 from env_config import Environment, values
 
+
 class Example(Environment):
     DEBUG = True
     SECRET_KEY = values.StringValue()
