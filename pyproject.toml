@@ -60,7 +60,7 @@ django-cache-url = { version = ">=3.4.5", optional = true }
 
 [tool.poetry.group.test.dependencies]
 pytest = "9.1.1"
-coverage = "7.15.4"
+coverage = "7.16.0"
 pytest-django = "4.14.0"
 nox = "2026.8.17"
 
