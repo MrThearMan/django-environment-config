@@ -1,3 +1,7 @@
+---
+description: "Django Environment Config: configure Django settings for multiple environments."
+---
+
 # Django Environment Config
 
 [![Coverage Status][coverage-badge]][coverage]

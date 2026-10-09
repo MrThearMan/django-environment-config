@@ -1,3 +1,7 @@
+---
+description: "How to contribute to Django Environment Config."
+---
+
 # Contributing
 
 Thank you for your interest in contributing!

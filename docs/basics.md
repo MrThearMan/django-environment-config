@@ -1,3 +1,7 @@
+---
+description: "How to define environments and select one with an environment variable."
+---
+
 # Basics
 
 Environments are defined with a simple class-based configuration in the `settings.py` module.

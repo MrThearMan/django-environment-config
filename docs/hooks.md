@@ -1,3 +1,7 @@
+---
+description: "Hooks that run before and after an environment loads its settings."
+---
+
 # Hooks
 
 The Environment-class provides a few hooks that can be used to add
