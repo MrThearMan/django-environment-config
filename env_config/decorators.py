@@ -7,8 +7,8 @@ __all__ = [
 
 
 class classproperty[R]:  # noqa: N801
-    def __init__(self, func: Callable[[type], Any]) -> None:
+    def __init__(self, func: Callable[[Any], R]) -> None:
         self.func = func
 
-    def __get__(self, instance: object, owner: type) -> Any:
+    def __get__(self, instance: object, owner: type) -> R:
         return self.func(owner)
