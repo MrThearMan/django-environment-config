@@ -74,9 +74,9 @@ class Environment:
         elif dotenv_path is Undefined:
             dotenv_path = None
 
-        dotenv: dict[str, str] | UndefinedType
+        dotenv: dict[str, str | None] | UndefinedType
         if use_environ:
-            dotenv = os.environ.copy()
+            dotenv = dict(os.environ)
         elif dotenv_path is not Undefined:
             dotenv = cls.load_dotenv(dotenv_path=dotenv_path, stack_level=2)
         else:
@@ -89,25 +89,19 @@ class Environment:
         setattr(cls, f"_{cls.__name__}__dotenv_path", dotenv_path)
 
         cls.pre_setup()
-        if (
-            hasattr(overrides_from, "pre_setup")
-            and callable(overrides_from.pre_setup)
-            and hasattr(overrides_from.pre_setup, "__func__")
-        ):
-            overrides_from.pre_setup.__func__(cls)  # type: ignore[attr-defined]
+        pre_setup = getattr(overrides_from, "pre_setup", None)
+        if callable(pre_setup) and hasattr(pre_setup, "__func__"):
+            pre_setup.__func__(cls)
 
         cls.setup(stack_level=2)
 
         cls.post_setup()
-        if (
-            hasattr(overrides_from, "post_setup")
-            and callable(overrides_from.post_setup)
-            and hasattr(overrides_from.post_setup, "__func__")
-        ):
-            overrides_from.post_setup.__func__(cls)  # type: ignore[attr-defined]
+        post_setup = getattr(overrides_from, "post_setup", None)
+        if callable(post_setup) and hasattr(post_setup, "__func__"):
+            post_setup.__func__(cls)
 
     @staticmethod
-    def load_dotenv(*, dotenv_path: StrPath | None = None, stack_level: int = 1) -> dict[str, str]:  # pragma: no cover
+    def load_dotenv(*, dotenv_path: StrPath | None = None, stack_level: int = 1) -> dict[str, str | None]:  # pragma: no cover
         """Load the `.env` file and return the values."""
         if dotenv_path is None:
             # Set the working directory to the django project directory in case called from a tool
@@ -142,9 +136,9 @@ class Environment:
         return {name: getattr(cls, name) for name in dir(cls) if name.isupper() and not name.startswith("_")}
 
     @classproperty
-    def dotenv(cls) -> dict[str, str] | UndefinedType:
+    def dotenv(cls: type[Environment]) -> dict[str, str | None] | UndefinedType:
         return getattr(cls, f"_{cls.__name__}__dotenv", Undefined)
 
     @classproperty
-    def dotenv_path(cls) -> str | UndefinedType | None:
+    def dotenv_path(cls: type[Environment]) -> StrPath | UndefinedType | None:
         return getattr(cls, f"_{cls.__name__}__dotenv_path", Undefined)

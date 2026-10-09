@@ -5,13 +5,13 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 from decimal import Decimal
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from django.utils.module_loading import import_string
 
 from .constants import Undefined, UndefinedType
 from .errors import MissingEnvValueError, MissingExtraDependencyError
-from .typing import Any, CacheConfig, DBConfig, DBConfigExtra, Generator, Generic, Mapping, Sequence, TypeVar, Unpack
+from .typing import Any, CacheConfig, DBConfig, DBConfigExtra, Generator, Generic, Iterable, Mapping, TypeVar, Unpack
 
 if TYPE_CHECKING:
     from .base import Environment
@@ -50,7 +50,7 @@ class Value(ABC, Generic[T]):
     def __init__(
         self,
         *,
-        default: T | None = Undefined,
+        default: Any = Undefined,
         env_name: str | UndefinedType | None = Undefined,
     ) -> None:
         """
@@ -60,8 +60,8 @@ class Value(ABC, Generic[T]):
         :param env_name: The name of the environment variable to use. If not given, the name of the field is used.
                          Set this to `None` to skip loading the value from the environment.
         """
-        self.default: T | None = default
-        self.name: str = env_name
+        self.default: Any = default
+        self.name: str = env_name if isinstance(env_name, str) else ""
         self.skip_env: bool = env_name is None
 
         # Use a map to store the value per environment so that we can have
@@ -71,7 +71,7 @@ class Value(ABC, Generic[T]):
 
     def __set_name__(self, env: type[Environment], name: str) -> None:
         """Called after the owner Environment-class is created with this field as a class attribute."""
-        if self.name in (Undefined, None):
+        if not self.name:
             self.name = name
 
     def __get__(self, _: Environment | None, env: type[Environment]) -> T:
@@ -83,17 +83,20 @@ class Value(ABC, Generic[T]):
         return self.value_by_environment[env]
 
     def get_for_environment(self, env: type[Environment]) -> T:
-        value = self.default if env.dotenv is Undefined or self.skip_env else env.dotenv.get(self.name, self.default)
+        dotenv = env.dotenv
+        value = self.default if dotenv is Undefined or self.skip_env else dotenv.get(self.name, self.default)
         if value is Undefined:
             raise MissingEnvValueError(name=self.name, env=env)
 
         if value is None:
-            return None
+            # Settings can be set to `None`, but typing every value as optional
+            # would make using the settings more cumbersome than it's worth.
+            return cast("T", None)
 
         return self.convert(value)
 
     @abstractmethod
-    def convert(self, value: str | T) -> T:  # pragma: no cover
+    def convert(self, value: Any) -> T:  # pragma: no cover
         """Convert the given value into the proper representation."""
         raise NotImplementedError
 
@@ -165,15 +168,15 @@ class SequenceValue(Value, ABC, Generic[T]):
         self,
         child: Value[T] | None = None,
         *,
-        default: Sequence[T] | None = Undefined,
+        default: Iterable[T] | str | UndefinedType | None = Undefined,
         env_name: str | UndefinedType | None = Undefined,
         delimiter: str = ",",
     ) -> None:
-        self.child = child or StringValue()
+        self.child: Value[Any] = child or StringValue()
         self.delimiter = delimiter
         super().__init__(default=default, env_name=env_name)
 
-    def iterate(self, value: str | Sequence[Any]) -> Generator[T, None, None]:
+    def iterate(self, value: str | Iterable[Any]) -> Generator[T, None, None]:
         seq = value.split(self.delimiter) if isinstance(value, str) else value
         for item in seq:
             if not item:
@@ -208,12 +211,12 @@ class MappingValue(Value, ABC, Generic[T]):
         self,
         child: Value[T] | None = None,
         *,
-        default: Mapping[str, T] | None = Undefined,
+        default: Mapping[str, T] | str | UndefinedType | None = Undefined,
         env_name: str | UndefinedType | None = Undefined,
         kv_delimiter: str = "=",
         item_delimiter: str = ";",
     ) -> None:
-        self.child = child or StringValue()
+        self.child: Value[Any] = child or StringValue()
         self.kv_delimiter = kv_delimiter
         self.item_delimiter = item_delimiter
         super().__init__(default=default, env_name=env_name)
@@ -230,10 +233,11 @@ class MappingValue(Value, ABC, Generic[T]):
                 if len(kv) != 2:  # noqa: PLR2004
                     msg = f"Cannot split key-value pair from {item!r}"
                     raise ValueError(msg)
+                key, val = kv
             else:
-                kv = item
+                key, val = item
 
-            yield kv[0].strip(), self.child.convert(kv[1].strip())
+            yield key.strip(), self.child.convert(val.strip())
 
 
 class DictValue(MappingValue):
@@ -289,7 +293,7 @@ class RegexValue(StringValue):
         self,
         *,
         regex: str,
-        default: str | None = Undefined,
+        default: str | UndefinedType | None = Undefined,
         env_name: str | UndefinedType | None = Undefined,
     ) -> None:
         self.regex = regex
@@ -308,7 +312,7 @@ class PathValue(StringValue):
     def __init__(
         self,
         *,
-        default: str | None = Undefined,
+        default: str | UndefinedType | None = Undefined,
         env_name: str | UndefinedType | None = Undefined,
         check_exists: bool = True,
         create_if_missing: bool = False,
@@ -330,14 +334,14 @@ class PathValue(StringValue):
         return str(path)
 
 
-class DatabaseURLValue(Value[DBConfig | str]):
+class DatabaseURLValue(Value[dict[str, DBConfig]]):
     """Load a database configuration from a URL."""
 
     def __init__(
         self,
         *,
         db_alias: str = "default",
-        default: DBConfig | str = Undefined,
+        default: DBConfig | str | UndefinedType = Undefined,
         env_name: str = "DATABASE_URL",
         **params: Unpack[DBConfigExtra],
     ) -> None:
@@ -360,17 +364,17 @@ class DatabaseURLValue(Value[DBConfig | str]):
             raise MissingExtraDependencyError(msg) from error
 
         config = parse(value, **self.params)
-        return {self.db_alias: config}  # type: ignore[return-value]
+        return {self.db_alias: cast("DBConfig", config)}
 
 
-class CacheURLValue(Value[CacheConfig | str]):
+class CacheURLValue(Value[dict[str, CacheConfig]]):
     """Load a cache configuration from a URL."""
 
     def __init__(
         self,
         *,
         cache_alias: str = "default",
-        default: CacheConfig | str = Undefined,
+        default: CacheConfig | str | UndefinedType = Undefined,
         env_name: str = "CACHE_URL",
     ) -> None:
         self.cache_alias = cache_alias

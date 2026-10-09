@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Callable, Generator, Mapping, Sequence
+from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
 from typing import Any, Generic, ParamSpec, TypedDict, TypeVar, Unpack
 
 __all__ = [
@@ -11,6 +11,7 @@ __all__ = [
     "DBConfigExtra",
     "Generator",
     "Generic",
+    "Iterable",
     "Mapping",
     "ParamSpec",
     "Sequence",
