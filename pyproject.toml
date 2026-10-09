@@ -1,6 +1,6 @@
 [project]
 name = "django-environment-config"
-version = "0.2.3"
+version = "0.2.4"
 description = "Configure django settings for multiple environments."
 authors = [
     { name = "Matti Lamppu", email = "lamppu.matti.akseli@gmail.com" },
