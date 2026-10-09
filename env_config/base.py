@@ -10,7 +10,7 @@ from django.utils.functional import classproperty
 from dotenv import dotenv_values
 from dotenv.main import find_dotenv
 
-from .constants import ENV_NAME, Undefined
+from .constants import ENV_NAME, Undefined, UndefinedType
 
 if TYPE_CHECKING:
     from dotenv.main import StrPath
@@ -36,7 +36,7 @@ class Environment:
     def __init_subclass__(  # noqa: C901
         cls,
         *,
-        dotenv_path: StrPath | Undefined | None = Undefined,
+        dotenv_path: StrPath | UndefinedType | None = Undefined,
         use_environ: bool = False,
         overrides_from: type | None = None,
     ) -> None:
@@ -74,7 +74,7 @@ class Environment:
         elif dotenv_path is Undefined:
             dotenv_path = None
 
-        dotenv: dict[str, str] | Undefined
+        dotenv: dict[str, str] | UndefinedType
         if use_environ:
             dotenv = os.environ.copy()
         elif dotenv_path is not Undefined:
@@ -142,9 +142,9 @@ class Environment:
         return {name: getattr(cls, name) for name in dir(cls) if name.isupper() and not name.startswith("_")}
 
     @classproperty
-    def dotenv(cls) -> dict[str, str] | Undefined:
+    def dotenv(cls) -> dict[str, str] | UndefinedType:
         return getattr(cls, f"_{cls.__name__}__dotenv", Undefined)
 
     @classproperty
-    def dotenv_path(cls) -> str | Undefined | None:
+    def dotenv_path(cls) -> str | UndefinedType | None:
         return getattr(cls, f"_{cls.__name__}__dotenv_path", Undefined)

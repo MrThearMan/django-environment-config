@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 from django.utils.module_loading import import_string
 
-from .constants import Undefined
+from .constants import Undefined, UndefinedType
 from .errors import MissingEnvValueError, MissingExtraDependencyError
 from .typing import Any, CacheConfig, DBConfig, DBConfigExtra, Generator, Generic, Mapping, Sequence, TypeVar, Unpack
 
@@ -51,7 +51,7 @@ class Value(ABC, Generic[T]):
         self,
         *,
         default: T | None = Undefined,
-        env_name: str | Undefined | None = Undefined,
+        env_name: str | UndefinedType | None = Undefined,
     ) -> None:
         """
         Value descriptor for an environment variable.
@@ -166,7 +166,7 @@ class SequenceValue(Value, ABC, Generic[T]):
         child: Value[T] | None = None,
         *,
         default: Sequence[T] | None = Undefined,
-        env_name: str | Undefined | None = Undefined,
+        env_name: str | UndefinedType | None = Undefined,
         delimiter: str = ",",
     ) -> None:
         self.child = child or StringValue()
@@ -209,7 +209,7 @@ class MappingValue(Value, ABC, Generic[T]):
         child: Value[T] | None = None,
         *,
         default: Mapping[str, T] | None = Undefined,
-        env_name: str | Undefined | None = Undefined,
+        env_name: str | UndefinedType | None = Undefined,
         kv_delimiter: str = "=",
         item_delimiter: str = ";",
     ) -> None:
@@ -290,7 +290,7 @@ class RegexValue(StringValue):
         *,
         regex: str,
         default: str | None = Undefined,
-        env_name: str | Undefined | None = Undefined,
+        env_name: str | UndefinedType | None = Undefined,
     ) -> None:
         self.regex = regex
         super().__init__(default=default, env_name=env_name)
@@ -309,7 +309,7 @@ class PathValue(StringValue):
         self,
         *,
         default: str | None = Undefined,
-        env_name: str | Undefined | None = Undefined,
+        env_name: str | UndefinedType | None = Undefined,
         check_exists: bool = True,
         create_if_missing: bool = False,
         mode: int = 0o777,

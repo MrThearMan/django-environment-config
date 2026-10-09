@@ -1,21 +1,28 @@
 from __future__ import annotations
 
+from enum import Enum
+from typing import Final, Literal
+
 __all__ = [
     "ENV_NAME",
     "Undefined",
+    "UndefinedType",
 ]
 
 
-class Undefined:  # pragma: no cover
+class UndefinedType(Enum):
     """Value to represent an undefined value."""
 
-    def __repr__(self) -> str:
-        return self.__class__.__name__
+    # A single-member enum is a sentinel that type checkers can narrow with `is` checks.
+    Undefined = "Undefined"
 
-    def __bool__(self) -> bool:
+    def __repr__(self) -> str:
+        return self.value
+
+    def __bool__(self) -> Literal[False]:
         return False
 
 
-Undefined = Undefined()
+Undefined: Final = UndefinedType.Undefined
 
 ENV_NAME = "DJANGO_SETTINGS_ENVIRONMENT"
