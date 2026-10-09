@@ -152,17 +152,17 @@ Accepts the following additional arguments:
 
 ### ListValue
 
-A [SequenceValue](#SequenceValue) descriptor for lists. The `convert` method will return the value as a
+A [SequenceValue](#sequencevalue) descriptor for lists. The `convert` method will return the value as a
 list if it can be converted. Otherwise, an exception will be raised.
 
 ### TupleValue
 
-A [SequenceValue](#SequenceValue) descriptor for tuples. The `convert` method will return the value as a
+A [SequenceValue](#sequencevalue) descriptor for tuples. The `convert` method will return the value as a
 tuple if it can be converted. Otherwise, an exception will be raised.
 
 ### SetValue
 
-A [SequenceValue](#SequenceValue) descriptor for sets. The `convert` method will return the value as a
+A [SequenceValue](#sequencevalue) descriptor for sets. The `convert` method will return the value as a
 sets if it can be converted. Otherwise, an exception will be raised.
 
 ### MappingValue
@@ -177,7 +177,7 @@ Accepts the following additional arguments:
 
 ### DictValue
 
-A [MappingValue](#MappingValue) descriptor for dicts. The `convert` method will return the value as a
+A [MappingValue](#mappingvalue) descriptor for dicts. The `convert` method will return the value as a
 dict if it can be converted. Otherwise, an exception will be raised.
 
 ### JsonValue
