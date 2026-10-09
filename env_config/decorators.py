@@ -1,15 +1,12 @@
 from collections.abc import Callable
-from typing import Any, Generic, TypeVar
+from typing import Any
 
 __all__ = [
     "classproperty",
 ]
 
 
-R = TypeVar("R")
-
-
-class classproperty(Generic[R]):  # noqa: N801
+class classproperty[R]:  # noqa: N801
     def __init__(self, func: Callable[[type], Any]) -> None:
         self.func = func
 

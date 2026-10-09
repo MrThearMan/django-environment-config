@@ -11,7 +11,7 @@ from django.utils.module_loading import import_string
 
 from .constants import Undefined, UndefinedType
 from .errors import MissingEnvValueError, MissingExtraDependencyError
-from .typing import Any, CacheConfig, DBConfig, DBConfigExtra, Generator, Generic, Iterable, Mapping, TypeVar, Unpack
+from .typing import Any, CacheConfig, DBConfig, DBConfigExtra, Generator, Iterable, Mapping, Unpack
 
 if TYPE_CHECKING:
     from .base import Environment
@@ -43,10 +43,7 @@ __all__ = [
 ]
 
 
-T = TypeVar("T")
-
-
-class Value(ABC, Generic[T]):
+class Value[T](ABC):
     def __init__(
         self,
         *,
@@ -163,7 +160,7 @@ class ImportStringValue(Value[str]):
         return value
 
 
-class SequenceValue(Value, ABC, Generic[T]):
+class SequenceValue[T](Value, ABC):
     def __init__(
         self,
         child: Value[T] | None = None,
@@ -206,7 +203,7 @@ class SetValue(SequenceValue):
         return set(self.iterate(value))
 
 
-class MappingValue(Value, ABC, Generic[T]):
+class MappingValue[T](Value, ABC):
     def __init__(
         self,
         child: Value[T] | None = None,
