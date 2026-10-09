@@ -93,7 +93,7 @@ class Value[T](ABC):
         return self.convert(value)
 
     @abstractmethod
-    def convert(self, value: Any) -> T:  # pragma: no cover
+    def convert(self, value: Any) -> T:
         """Convert the given value into the proper representation."""
         raise NotImplementedError
 
@@ -352,7 +352,7 @@ class DatabaseURLValue(Value[dict[str, DBConfig]]):
 
         try:
             from dj_database_url import parse
-        except ImportError as error:  # pragma: no cover
+        except ImportError as error:
             msg = (
                 "You must install the 'db' extra dependency "
                 "(e.g., `pip install django-environment-config[db]`) "
@@ -383,7 +383,7 @@ class CacheURLValue(Value[dict[str, CacheConfig]]):
 
         try:
             from django_cache_url import parse
-        except ImportError as error:  # pragma: no cover
+        except ImportError as error:
             msg = (
                 "You must install the 'cache' extra dependency "
                 "(e.g., `pip install django-environment-config[cache]`) "

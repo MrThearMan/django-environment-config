@@ -1,4 +1,5 @@
 import re
+import sys
 from decimal import Decimal, InvalidOperation
 from json import JSONDecodeError
 from pathlib import Path
@@ -8,6 +9,7 @@ import pytest
 from django.core.exceptions import ValidationError
 
 from env_config import Environment, values
+from env_config.errors import MissingExtraDependencyError
 from tests.helpers import set_dotenv
 
 
@@ -731,3 +733,27 @@ def test_environment__cache_url__from_str_default():
             "LOCATION": "redis://master:6379/0",
         }
     }
+
+
+@set_dotenv("Test", DATABASE_URL="sqlite://")
+def test_environment__database_url__extra_not_installed(monkeypatch):
+    # A `None` entry in `sys.modules` makes importing the module raise an ImportError.
+    monkeypatch.setitem(sys.modules, "dj_database_url", None)
+
+    msg = "You must install the 'db' extra dependency"
+    with pytest.raises(MissingExtraDependencyError, match=re.escape(msg)):
+
+        class Test(Environment):
+            DATABASES = values.DatabaseURLValue()
+
+
+@set_dotenv("Test", CACHE_URL="locmem://")
+def test_environment__cache_url__extra_not_installed(monkeypatch):
+    # A `None` entry in `sys.modules` makes importing the module raise an ImportError.
+    monkeypatch.setitem(sys.modules, "django_cache_url", None)
+
+    msg = "You must install the 'cache' extra dependency"
+    with pytest.raises(MissingExtraDependencyError, match=re.escape(msg)):
+
+        class Test(Environment):
+            CACHES = values.CacheURLValue()

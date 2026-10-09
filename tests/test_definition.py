@@ -3,7 +3,7 @@ import re
 import pytest
 
 from env_config import Environment, values
-from env_config.constants import Undefined
+from env_config.constants import ENV_NAME, Undefined
 from env_config.decorators import classproperty
 from env_config.errors import MissingEnvValueError
 from tests.helpers import set_dotenv, set_environ
@@ -194,3 +194,48 @@ def test_environment__env_name__null__default():
         FOO = values.StringValue(default="foo", env_name=None)
 
     assert Test.FOO == "foo"
+
+
+def test_environment__env_name_not_set(monkeypatch):
+    monkeypatch.delenv(ENV_NAME, raising=False)
+
+    msg = f"Environment variable {ENV_NAME!r} must be set before subclassing 'Environment'"
+    with pytest.raises(ValueError, match=re.escape(msg)):
+
+        class Test(Environment):
+            pass
+
+
+def test_environment__dotenv_path(monkeypatch, tmp_path):
+    dotenv_path = tmp_path / ".env"
+    dotenv_path.write_text("FOO=bar\n", encoding="utf-8")
+    monkeypatch.setenv(ENV_NAME, "Test")
+
+    class Test(Environment, dotenv_path=dotenv_path):
+        FOO = values.StringValue()
+
+    assert Test.dotenv_path == dotenv_path
+    assert Test.FOO == "bar"
+
+
+def test_environment__find_dotenv(monkeypatch, tmp_path):
+    (tmp_path / ".env").write_text("FOO=bar\n", encoding="utf-8")
+    monkeypatch.setenv(ENV_NAME, "Test")
+
+    # The `.env` file is searched from the directory of the module that defines the environment,
+    # so the environment is defined in a module that is "located" in the temporary directory.
+    code = "from env_config import Environment, values\n\nclass Test(Environment):\n    FOO = values.StringValue()\n"
+    module_globals = {}
+    exec(compile(code, str(tmp_path / "settings.py"), "exec"), module_globals)
+
+    assert module_globals["FOO"] == "bar"
+
+
+def test_undefined():
+    assert repr(Undefined) == "Undefined"
+    assert bool(Undefined) is False
+
+
+def test_value__convert_not_implemented():
+    with pytest.raises(NotImplementedError):
+        values.Value.convert(values.StringValue(), "foo")

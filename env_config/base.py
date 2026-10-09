@@ -57,7 +57,7 @@ class Environment:
                     setattr(cls, name, value)
 
         env: str | None = os.environ.get(ENV_NAME)
-        if env is None:  # pragma: no cover
+        if env is None:
             msg = f"Environment variable {ENV_NAME!r} must be set before subclassing 'Environment'"
             raise ValueError(msg)
 
@@ -101,7 +101,7 @@ class Environment:
             post_setup.__func__(cls)
 
     @staticmethod
-    def load_dotenv(*, dotenv_path: StrPath | None = None, stack_level: int = 1) -> dict[str, str | None]:  # pragma: no cover
+    def load_dotenv(*, dotenv_path: StrPath | None = None, stack_level: int = 1) -> dict[str, str | None]:
         """Load the `.env` file and return the values."""
         if dotenv_path is None:
             # Set the working directory to the django project directory in case called from a tool
