@@ -145,7 +145,7 @@ class FloatValue(Value[float]):
         return float(value)
 
 
-class DecimalValue(Value[Decimal], Decimal):
+class DecimalValue(Value[Decimal]):
     """Parses env variables into a Decimal value."""
 
     def convert(self, value: str | Decimal) -> Decimal:
