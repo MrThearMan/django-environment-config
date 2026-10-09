@@ -2,58 +2,58 @@
 Palette
 */
 :root {
-    --undine-text-color: #bbbbbb;
-    --undine-nav-color: #191919;
-    --undine-section-color: #222222;
-    --undine-active-color: #111111;
-    --undine-quote-color: #424242;
-    --undine-notice-color: #aa4926;
-    --undine-target-color: #292900;
+    --docs-text-color: #bbbbbb;
+    --docs-nav-color: #191919;
+    --docs-section-color: #222222;
+    --docs-active-color: #111111;
+    --docs-quote-color: #424242;
+    --docs-notice-color: #aa4926;
+    --docs-target-color: #292900;
 
-    --undine-code-color: #1a1c20;
-    --undine-lineno-color: #404d60;
-    --undine-highlight-color: #23252d;
+    --docs-code-color: #1a1c20;
+    --docs-lineno-color: #404d60;
+    --docs-highlight-color: #23252d;
 
-    --undine-scrollbar-color: #424242;
+    --docs-scrollbar-color: #424242;
 
-    --undine-link-color: #4f9ed9;
-    --undine-link-hover-color: #7fbce8;
+    --docs-link-color: #4f9ed9;
+    --docs-link-hover-color: #7fbce8;
 }
 
 [data-md-color-scheme="slate"] {
-    --md-default-bg-color: var(--undine-section-color);
-    --md-default-fg-color: var(--undine-text-color);
+    --md-default-bg-color: var(--docs-section-color);
+    --md-default-fg-color: var(--docs-text-color);
     --md-default-fg-color--light: #999999;
     --md-default-fg-color--lighter: #6a6a6a;
     --md-default-fg-color--lightest: #3a3a3a;
 
-    --md-primary-fg-color: var(--undine-nav-color);
-    --md-primary-fg-color--light: var(--undine-section-color);
-    --md-primary-fg-color--dark: var(--undine-active-color);
-    --md-primary-bg-color: var(--undine-text-color);
+    --md-primary-fg-color: var(--docs-nav-color);
+    --md-primary-fg-color--light: var(--docs-section-color);
+    --md-primary-fg-color--dark: var(--docs-active-color);
+    --md-primary-bg-color: var(--docs-text-color);
     --md-primary-bg-color--light: #999999;
 
-    --md-accent-fg-color: var(--undine-link-hover-color);
-    --md-accent-fg-color--transparent: var(--undine-active-color);
-    --md-accent-bg-color: var(--undine-section-color);
+    --md-accent-fg-color: var(--docs-link-hover-color);
+    --md-accent-fg-color--transparent: var(--docs-active-color);
+    --md-accent-bg-color: var(--docs-section-color);
 
-    --md-typeset-color: var(--undine-text-color);
-    --md-typeset-a-color: var(--undine-link-color);
-    --md-typeset-mark-color: var(--undine-target-color);
+    --md-typeset-color: var(--docs-text-color);
+    --md-typeset-a-color: var(--docs-link-color);
+    --md-typeset-mark-color: var(--docs-target-color);
     --md-typeset-del-color: #5a2a2a;
     --md-typeset-ins-color: #2a5a2a;
-    --md-typeset-table-color: var(--undine-quote-color);
+    --md-typeset-table-color: var(--docs-quote-color);
 
-    --md-code-fg-color: var(--undine-text-color);
-    --md-code-bg-color: var(--undine-code-color);
-    --md-code-hl-color: var(--undine-highlight-color);
-    --md-code-hl-color--light: var(--undine-highlight-color);
+    --md-code-fg-color: var(--docs-text-color);
+    --md-code-bg-color: var(--docs-code-color);
+    --md-code-hl-color: var(--docs-highlight-color);
+    --md-code-hl-color--light: var(--docs-highlight-color);
 
-    --md-footer-fg-color: var(--undine-text-color);
+    --md-footer-fg-color: var(--docs-text-color);
     --md-footer-fg-color--light: #999999;
     --md-footer-fg-color--lighter: #6a6a6a;
-    --md-footer-bg-color: var(--undine-nav-color);
-    --md-footer-bg-color--dark: var(--undine-active-color);
+    --md-footer-bg-color: var(--docs-nav-color);
+    --md-footer-bg-color--dark: var(--docs-active-color);
 
     --md-shadow-z1: none;
     --md-shadow-z2: none;
@@ -66,9 +66,9 @@ Palette
 Header
 */
 .md-header {
-    background-color: var(--undine-nav-color);
+    background-color: var(--docs-nav-color);
     box-shadow: none;
-    border-bottom: 1px solid var(--undine-active-color);
+    border-bottom: 1px solid var(--docs-active-color);
 }
 
 /*
@@ -79,7 +79,7 @@ The primary sidebar is a sticky, zero-height stub, so the nav column is painted
 on the scroll wrapper that actually spans the viewport.
 */
 .md-sidebar--primary .md-sidebar__scrollwrap {
-    background-color: var(--undine-nav-color);
+    background-color: var(--docs-nav-color);
     border-radius: 6px;
     min-height: calc(100vh - 4.8rem);
 }
@@ -91,17 +91,17 @@ on the scroll wrapper that actually spans the viewport.
 /* On mobile the primary nav is a drawer that covers the page. */
 .md-nav--primary,
 .md-nav--primary .md-nav__title {
-    background-color: var(--undine-nav-color);
+    background-color: var(--docs-nav-color);
 }
 
 .md-nav__title {
-    color: var(--undine-text-color);
+    color: var(--docs-text-color);
     background-color: inherit;
     box-shadow: none;
 }
 
 .md-nav__link {
-    color: var(--undine-text-color);
+    color: var(--docs-text-color);
 }
 
 .md-sidebar--primary .md-nav__link {
@@ -114,19 +114,19 @@ on the scroll wrapper that actually spans the viewport.
 .md-nav--primary .md-nav__link[for]:hover:not(.md-nav__link--active),
 .md-nav--primary .md-nav__link[href]:focus:not(.md-nav__link--active),
 .md-nav--primary .md-nav__link[href]:hover:not(.md-nav__link--active) {
-    color: var(--undine-text-color);
-    background-color: var(--undine-active-color);
+    color: var(--docs-text-color);
+    background-color: var(--docs-active-color);
 }
 
 .md-nav--primary .md-nav__item .md-nav__link--active,
 .md-nav--primary .md-nav__item .md-nav__link--active code {
-    color: var(--undine-text-color);
+    color: var(--docs-text-color);
     font-weight: 700;
 }
 
 /* The table of contents is a reading aid, so it stays quiet until hovered. */
 .md-sidebar--secondary .md-nav__link--active {
-    color: var(--undine-link-color);
+    color: var(--docs-link-color);
     background-color: transparent;
 }
 
@@ -134,7 +134,7 @@ on the scroll wrapper that actually spans the viewport.
 Content
 */
 .md-main {
-    background-color: var(--undine-section-color);
+    background-color: var(--docs-section-color);
 }
 
 /*
@@ -161,12 +161,12 @@ A top margin here would let them slide up by that much on the first scroll.
     padding-left: 0.5rem;
     padding-right: 0.5rem;
     border-radius: 6px;
-    background-color: var(--undine-target-color);
+    background-color: var(--docs-target-color);
 }
 
 /* The raise centres the icon on the cap height of the heading it belongs to. */
 .md-typeset .headerlink {
-    color: var(--undine-lineno-color);
+    color: var(--docs-lineno-color);
     font-size: 0.8em;
     vertical-align: 0.125em;
 }
@@ -180,61 +180,61 @@ Codeblocks
 }
 
 .md-typeset .highlight {
-    color: var(--undine-text-color);
-    background-color: var(--undine-code-color);
-    border: 1px solid var(--undine-code-color);
+    color: var(--docs-text-color);
+    background-color: var(--docs-code-color);
+    border: 1px solid var(--docs-code-color);
     margin: 24px 0;
 }
 
 .md-typeset .highlighttable {
     margin: 0;
-    background-color: var(--undine-code-color);
+    background-color: var(--docs-code-color);
 }
 
 .md-typeset .highlighttable .linenos {
-    background-color: var(--undine-code-color);
+    background-color: var(--docs-code-color);
     border: none;
 }
 
 .md-typeset .highlighttable .linenodiv pre {
-    border-right: 1px solid var(--undine-lineno-color);
+    border-right: 1px solid var(--docs-lineno-color);
     padding: 0;
     line-height: 1.4;
 }
 
 .md-typeset .highlighttable .linenodiv a {
-    color: var(--undine-lineno-color);
+    color: var(--docs-lineno-color);
 }
 
 .md-typeset .highlighttable .linenodiv .special {
-    background-color: var(--undine-highlight-color);
+    background-color: var(--docs-highlight-color);
 }
 
 .md-typeset .highlighttable .code {
-    background-color: var(--undine-code-color);
+    background-color: var(--docs-code-color);
     border: none;
 }
 
 .md-typeset .highlighttable .code pre,
 .md-typeset .highlighttable .code code {
-    color: var(--undine-text-color);
-    background-color: var(--undine-code-color);
+    color: var(--docs-text-color);
+    background-color: var(--docs-code-color);
     line-height: 1.4;
     border: none;
 }
 
 .md-typeset .highlight .hll,
 .md-typeset .highlight [data-linenos]:before {
-    background-color: var(--undine-highlight-color);
+    background-color: var(--docs-highlight-color);
 }
 
 /*
 Inline code
 */
 .md-typeset code {
-    color: var(--undine-text-color);
-    background-color: var(--undine-code-color);
-    border: 1px solid var(--undine-code-color);
+    color: var(--docs-text-color);
+    background-color: var(--docs-code-color);
+    border: 1px solid var(--docs-code-color);
     border-radius: 6px;
 }
 
@@ -247,7 +247,7 @@ Details
     margin-bottom: 24px;
     padding: 16px;
     background-color: transparent;
-    border: 2px solid var(--undine-quote-color);
+    border: 2px solid var(--docs-quote-color);
     border-radius: 6px;
     box-shadow: none;
     font-size: inherit;
@@ -306,7 +306,7 @@ html .md-typeset details > :last-child {
 }
 
 .md-typeset details > summary:after {
-    color: var(--undine-text-color);
+    color: var(--docs-text-color);
 }
 
 .md-typeset details > p {
@@ -319,10 +319,10 @@ Blockquotes
 /* The theme sets the blockquote border with a `[dir]` selector, so these must match its specificity. */
 [dir="ltr"] .md-typeset blockquote,
 [dir="rtl"] .md-typeset blockquote {
-    color: var(--undine-text-color);
-    background-color: var(--undine-quote-color);
-    border: 1px solid var(--undine-quote-color);
-    border-left: 4px solid var(--undine-notice-color);
+    color: var(--docs-text-color);
+    background-color: var(--docs-quote-color);
+    border: 1px solid var(--docs-quote-color);
+    border-left: 4px solid var(--docs-notice-color);
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
     margin-left: 0;
@@ -341,63 +341,63 @@ Blockquotes
 Tables
 */
 .md-typeset table:not([class]) {
-    background-color: var(--undine-code-color);
-    border: 1px solid var(--undine-quote-color);
+    background-color: var(--docs-code-color);
+    border: 1px solid var(--docs-quote-color);
 }
 
 .md-typeset table:not([class]) th {
-    color: var(--undine-text-color);
-    background-color: var(--undine-nav-color);
+    color: var(--docs-text-color);
+    background-color: var(--docs-nav-color);
 }
 
 .md-typeset table:not([class]) td {
-    background-color: var(--undine-code-color);
-    border-top: 1px solid var(--undine-quote-color);
+    background-color: var(--docs-code-color);
+    border-top: 1px solid var(--docs-quote-color);
 }
 
 /*
 Search
 */
 .md-search__form {
-    background-color: var(--undine-section-color);
+    background-color: var(--docs-section-color);
 }
 
 .md-search__form:hover {
-    background-color: var(--undine-active-color);
+    background-color: var(--docs-active-color);
 }
 
 [data-md-toggle="search"]:checked ~ .md-header .md-search__form {
-    background-color: var(--undine-section-color);
+    background-color: var(--docs-section-color);
 }
 
 .md-search__input {
-    color: var(--undine-text-color);
-    caret-color: var(--undine-text-color);
+    color: var(--docs-text-color);
+    caret-color: var(--docs-text-color);
 }
 
 .md-search__input::placeholder {
-    color: var(--undine-text-color);
+    color: var(--docs-text-color);
 }
 
 .md-search-result__meta,
 .md-search-result__article,
 .md-search-result__teaser {
-    color: var(--undine-text-color);
+    color: var(--docs-text-color);
 }
 
 .md-search__output {
-    background-color: var(--undine-nav-color);
+    background-color: var(--docs-nav-color);
 }
 
 /*
 Footer
 */
 .md-footer {
-    background-color: var(--undine-nav-color);
+    background-color: var(--docs-nav-color);
 }
 
 .md-footer-meta {
-    background-color: var(--undine-active-color);
+    background-color: var(--docs-active-color);
 }
 
 /*
@@ -406,21 +406,21 @@ Scrollbars
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
-    background-color: var(--undine-nav-color);
+    background-color: var(--docs-nav-color);
 }
 
 ::-webkit-scrollbar-track {
     border-radius: 6px;
-    background-color: var(--undine-nav-color);
+    background-color: var(--docs-nav-color);
 }
 
 ::-webkit-scrollbar-thumb {
     border-radius: 6px;
-    background-color: var(--undine-scrollbar-color);
+    background-color: var(--docs-scrollbar-color);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background-color: var(--undine-scrollbar-color);
+    background-color: var(--docs-scrollbar-color);
 }
 
 /*
@@ -429,14 +429,14 @@ browser ignore the `::-webkit-scrollbar` rules above for them. They need their o
 */
 .md-typeset pre > code,
 .md-sidebar__scrollwrap {
-    scrollbar-color: var(--undine-scrollbar-color) transparent;
+    scrollbar-color: var(--docs-scrollbar-color) transparent;
 }
 
 /* The theme tints these with the accent colour on hover, which is a link blue here. */
 .md-typeset pre > code:hover,
 .md-sidebar__scrollwrap:focus-within,
 .md-sidebar__scrollwrap:hover {
-    scrollbar-color: var(--undine-scrollbar-color) transparent;
+    scrollbar-color: var(--docs-scrollbar-color) transparent;
 }
 
 /*
@@ -445,10 +445,10 @@ Mermaid
 [data-md-color-scheme="slate"] {
     --md-mermaid-font-family: var(--md-text-font-family), sans-serif;
 
-    --md-mermaid-bg-color: var(--undine-section-color);
+    --md-mermaid-bg-color: var(--docs-section-color);
     --md-mermaid-edge-color: #6C8EBF;
     --md-mermaid-label-bg-color: #DAE8FC;
-    --md-mermaid-label-fg-color: var(--undine-code-color);
+    --md-mermaid-label-fg-color: var(--docs-code-color);
     --md-mermaid-node-bg-color: #DAE8FC;
     --md-mermaid-node-fg-color: #6C8EBF;
 }
