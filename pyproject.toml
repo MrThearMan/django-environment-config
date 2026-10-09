@@ -32,7 +32,14 @@ classifiers = [
     "Framework :: Django :: 6.1",
 ]
 requires-python = ">=3.12"
-dynamic = ["dependencies"]
+dependencies = [
+    "django>=5.2.17",
+    "python-dotenv>=1.2.4",
+]
+
+[project.optional-dependencies]
+cache = ["django-cache-url>=3.4.5"]
+db = ["dj-database-url>=2.3.0"]
 
 [project.urls]
 "Homepage" = "https://mrthearman.github.io/django-environment-config"
@@ -43,37 +50,42 @@ dynamic = ["dependencies"]
 [project.entry-points.pytest11]
 django_environment_config = "env_config_pytest_plugin.hooks"
 
-[tool.poetry]
-requires-poetry = ">=2.0.0"
-packages = [
-    { include = "env_config" },
-    { include = "env_config_pytest_plugin" },
+[dependency-groups]
+# Development installs the library with every extra, so that "uv run" needs no
+# extra flags and every optional integration is importable.
+dev = [
+    "django-environment-config[cache,db]",
+]
+test = [
+    "pytest==9.1.1",
+    "pytest-django==4.14.0",
+    "coverage==7.16.2",
+    "nox==2026.8.17",
+]
+docs = [
+    "mkdocs==1.6.1",
+    "pymdown-extensions==12.1",
+    "pygments==2.21.0",
+    "mkdocs-mermaid2-plugin==1.2.3",
+]
+lint = [
+    "pre-commit==4.6.2",
 ]
 
-[tool.poetry.dependencies]
-Django = ">=5.2.17"
-python-dotenv = ">=1.2.4"
-dj-database-url = { version = ">=2.3.0", optional = true }
-django-cache-url = { version = ">=3.4.5", optional = true }
+[tool.uv]
+default-groups = "all"
 
-[tool.poetry.group.test.dependencies]
-pytest = "9.1.1"
-coverage = "7.16.2"
-pytest-django = "4.14.0"
-nox = "2026.8.17"
+[tool.uv.sources]
+# Lets the "dev" group name this project's own extras.
+django-environment-config = { workspace = true }
 
-[tool.poetry.group.docs.dependencies]
-mkdocs = "1.6.1"
-pymdown-extensions = "12.1"
-pygments = "2.21.0"
-mkdocs-mermaid2-plugin = "1.2.3"
-
-[tool.poetry.group.lint.dependencies]
-pre-commit = "4.6.2"
-
-[tool.poetry.extras]
-cache = ["django-cache-url"]
-db = ["dj-database-url"]
+[tool.uv.build-backend]
+# The packages are at the repository root, not under "src".
+module-root = ""
+module-name = [
+    "env_config",
+    "env_config_pytest_plugin",
+]
 
 [tool.ruff]
 fix = true
@@ -282,5 +294,5 @@ DJANGO_SETTINGS_MODULE = "example_project.config.settings"
 addopts = "-vv -s --disable-warnings"
 
 [build-system]
-requires = ["poetry-core>=2.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.12.24,<0.13.0"]
+build-backend = "uv_build"

@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import logging
 import re
+import tomllib
 from functools import cache
 from pathlib import Path
 
 import nox
-import tomllib
 
 logger = logging.getLogger(__name__)
 
@@ -45,14 +45,38 @@ def get_versions(pattern: re.Pattern[str]) -> list[str]:
 @nox.session(python=python_versions(), reuse_venv=True)
 @nox.parametrize("django", django_versions())
 def tests(session: nox.Session, django: str) -> None:
-    env = {
-        "POETRY_VIRTUALENVS_PATH": str(Path(session.virtualenv.bin).parent),
-    }
+    venv = session.virtualenv.location
+    env = {"UV_PROJECT_ENVIRONMENT": venv}
 
-    session.run_install("poetry", "install", "--all-extras", external=True, env=env)
-    session.install(f"django=={django}")
+    # "uv sync" picks its own interpreter unless "--python" names one, and would replace
+    # the virtualenv nox just made with one built from the first entry in ".python-version".
+    session.run_install(
+        "uv",
+        "sync",
+        "--all-extras",
+        "--all-groups",
+        "--python",
+        venv,
+        external=True,
+        env=env,
+    )
 
-    session.run("coverage", "run", "-m", "pytest", external="error")
+    # "uv sync" removes every package the lockfile does not name, pip included,
+    # so the version under test is installed with uv as well.
+    session.run_install(
+        "uv",
+        "pip",
+        "install",
+        "--python",
+        venv,
+        f"django=={django}",
+        external=True,
+    )
+
+    session.run("coverage", "run", "--parallel-mode", "-m", "pytest", *session.posargs, external="error")
+
+    # "coverage combine" consumes all parallel data files next to the data file it writes to.
+    session.run("coverage", "combine", "--append")
 
 
 if __name__ == "__main__":
